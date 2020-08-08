@@ -6,36 +6,33 @@ $RealMessenger = $modx->getService('RealMessenger', 'RealMessenger', MODX_CORE_P
 if (!$RealMessenger) {
     return 'Could not load RealMessenger class!';
 }
+$RealMessenger->initialize($modx->context->key,$scriptProperties);
 
-// Do your snippet code here. This demo grabs 5 items from our custom table.
-$tpl = $modx->getOption('tpl', $scriptProperties, 'Item');
-$sortby = $modx->getOption('sortby', $scriptProperties, 'name');
-$sortdir = $modx->getOption('sortbir', $scriptProperties, 'ASC');
-$limit = $modx->getOption('limit', $scriptProperties, 5);
-$outputSeparator = $modx->getOption('outputSeparator', $scriptProperties, "\n");
-$toPlaceholder = $modx->getOption('toPlaceholder', $scriptProperties, false);
 
-// Build query
-$c = $modx->newQuery('RealMessengerItem');
-$c->sortby($sortby, $sortdir);
-$c->where(['active' => 1]);
-$c->limit($limit);
-$items = $modx->getIterator('RealMessengerItem', $c);
+$OuterTpl = $modx->getOption('OuterTpl', $scriptProperties, 'tpl.RealMessenger.outer');
+$ContactGroups = $modx->getOption('ContactGroups', $scriptProperties, '2');
 
-// Iterate through items
-$list = [];
-/** @var RealMessengerItem $item */
-foreach ($items as $item) {
-    $list[] = $modx->getChunk($tpl, $item->toArray());
+$with_user_id = (int)$_GET['user_id'];
+if((int)$with_user_id){
+    //ишем или создаем чат с юзером
 }
 
-// Output
-$output = implode($outputSeparator, $list);
-if (!empty($toPlaceholder)) {
-    // If using a placeholder, output nothing and set output to specified placeholder
-    $modx->setPlaceholder($toPlaceholder, $output);
+$messages = '';
+$resp = $RealMessenger->get_chat_messages(['chat'=> $active_chat]);
+if($resp['success']) $messages = $resp['data']['messages'];
 
-    return '';
-}
-// By default just return output
+$chats = '';
+$resp = $RealMessenger->get_chats($active_chat);
+if($resp['success']) $chats = $resp['data']['chats'];
+
+$search_contact = '';
+$search_contact = $RealMessenger->search_contact($ContactGroups);
+if($resp['success']) $search_contact = $resp['data']['search_contact'];
+
+$output = $RealMessenger->pdoTools->getChunk($OuterTpl,[
+    'hash'=>$RealMessenger->config['hash'],
+    'messages'=>$messages,
+    'chats'=> $chats,
+    'search_contact'=> $search_contact,
+]);
 return $output;

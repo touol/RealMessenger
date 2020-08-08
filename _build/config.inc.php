@@ -22,7 +22,7 @@ return [
     ),
     // Which elements should be updated on package upgrade
     'update' => [
-        'chunks' => false,
+        'chunks' => true,
         'menus' => true,
         'plugins' => true,
         'resources' => false,
