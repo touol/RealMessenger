@@ -9,6 +9,10 @@ return [
                 'type' => 'textfield',
                 'value' => '2',
             ],
+            'ContactGroupsPageIds' => [
+                'type' => 'textfield',
+                'value' => '',
+            ],
             'OuterTpl' => [
                 'type' => 'textfield',
                 'value' => 'tpl.RealMessenger.outer',

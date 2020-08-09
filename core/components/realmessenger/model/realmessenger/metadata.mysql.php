@@ -3,8 +3,8 @@
 $xpdo_meta_map = array (
   'xPDOSimpleObject' => 
   array (
-    0 => 'RealMessengerOrg',
-    1 => 'RealMessengerLeed',
-    2 => 'RealMessengerRewiev',
+    0 => 'RealMessengerMessage',
+    1 => 'RealMessengerChat',
+    2 => 'RealMessengerChatUser',
   ),
 );

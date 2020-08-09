@@ -36,6 +36,8 @@ class RealMessenger
             'customPath' => $corePath . 'custom/',
 
             'connectorUrl' => $assetsUrl . 'connector.php',
+            'actionUrl' => $assetsUrl . 'action.php',
+
             'assetsUrl' => $assetsUrl,
             'cssUrl' => $assetsUrl . 'css/',
             'jsUrl' => $assetsUrl . 'js/',
@@ -100,6 +102,7 @@ class RealMessenger
 
                         }
                     }
+                    if(empty($this->config['ContactGroupsPageIds'])) $this->config['ContactGroupsPageIds'] = $this->modx->resource->id;
                     $_SESSION['RealMessenger'][$this->config['hash']] = $this->config;
                     /*if(isset($_SESSION['getTables'][$this->config['hash']][$gts_class][$gts_name]))
 			        return $_SESSION['getTables'][$this->config['hash']][$gts_class][$gts_name];*/
@@ -118,8 +121,11 @@ class RealMessenger
             case 'get_chat_messages': 
                 return $this->get_chat_messages($data);
                 break;
-            case 'save_chat_message': 
-                return $this->get_new_chat_message($data);
+            case 'save_message': 
+                return $this->save_message($data);
+                break;
+            case 'find_or_new_chat': 
+                return $this->find_or_new_chat($data);
                 break;
             case 'autocomplect_search_contact': 
                 return $this->autocomplect_search_contact($data);
@@ -129,17 +135,325 @@ class RealMessenger
         }
     }
     
+    public function save_message($data)
+    {
+        //$chat = $data['chat'];
+        $user_id = $this->modx->user->id;
+        $hash = $data['hash'];
+        //$this->modx->log(1,"save_message " . print_r($data,1));
+        $data0 = [];
+        foreach($data['data'] as $v){
+            $data0[$v['name']] = $v['value'];
+        }
+        $data = $data0;
+        //$this->modx->log(1,"save_message " . print_r($data,1));
+        if(empty($hash)) $hash = $this->config['hash'];
+        if($chat = $this->modx->getObject('RealMessengerChat',['id'=>(int)$data['chat'],'closed'=>0])
+            and $ChatUser = $this->modx->getObject('RealMessengerChatUser',['chat'=>(int)$data['chat'],'user_id'=>$user_id])
+            ){
+            
+            //$ip = $this->modx->request->getClientIp();
+            $message = [
+                'chat'=>$chat->id,
+                'raw'=> trim($data['text']),
+                'text'=> $this->Jevix($data['text'], 'Comment'),
+                'ip' => '',//$ip['ip'],
+                'createdon' => date('Y-m-d H:i:s'),
+                'createdby' => $user_id,
+            ];
+            if ($this->gtsNotify) {
+                if($notify = $this->gtsNotify->create_notify($message)){
+                    $message['notify_id'] = $notify->id;
+                    $messenger_users = $this->prepCommentNotifyes($chat,$notify,$hash);
+                }
+            }
+            if($mes = $this->modx->newObject('RealMessengerMessage', $message)){
+                $mes->save();
+                
+                //return $this->success('',['message'=>$mes->toArray()]);
+                if(isset($_SESSION['RealMessenger'][$hash]['MessageTpl'])){
+                    $MessageTpl = $_SESSION['RealMessenger'][$hash]['MessageTpl'];
+                }else{
+                    $MessageTpl = 'tpl.RealMessenger.message';
+                }
+                
+                
+                $default = array(
+                    'class' => 'RealMessengerMessage',
+                    'where' => [
+                        'RealMessengerMessage.chat'=>$chat->id,
+                        'RealMessengerMessage.deleted'=> 0,
+                        'RealMessengerMessage.id'=> $mes->id,
+                    ],
+                    'leftJoin' => [
+                        'modUser'=>[
+                            'class'=>'modUser',
+                            'on'=>'modUser.id = RealMessengerMessage.createdby',
+                        ],
+                        'modUserProfile'=>[
+                            'class'=>'modUserProfile',
+                            'on'=>'modUserProfile.internalKey = RealMessengerMessage.createdby',
+                        ],
+                    ],
+                    'select' => [
+                        'RealMessengerMessage'=>'*',
+                        'modUser'=>$this->modx->getSelectColumns('modUser','modUser','',array('username')),
+                        'modUserProfile'=>$this->modx->getSelectColumns('modUserProfile','modUserProfile','',array(
+                            'id','internalKey','blocked','blockeduntil','blockedafter','logincount','thislogin','failedlogincount'
+                            ,'sessionid'
+                            ),true),
+                    ],
+                    'sortby'=>['RealMessengerMessage.id'=>'DESC'],
+                    'limit'=>50,
+                    'return' => 'data',
+                );
+                
+                $this->pdoTools->setConfig($default, false);
+                $rows = $this->pdoTools->run();
+                $output = [];
+                foreach($rows as $row){
+                    $row['ownmessage'] = 1;
+                    $output[] = $this->pdoTools->getChunk($MessageTpl,$row);
+                    $message = $row;
+                }
+                //получить кол-во последних сообщений в чате и дописать в notify channel при send
+                if($notify){
+                    $user_data = [];
+                    $last_user_id = 'a';
+                    foreach($messenger_users as $m_user){
+                        //считаем новые сообщения
+                        if($last_user_id != $m_user['user_id']){
+                            $query = $this->modx->newQuery('RealMessengerMessage');
+                            $query->where(array(
+                                array(
+                                    'chat:=' => $chat->id,
+                                    array(
+                                        'AND:createdon:>=' => $m_user['timestamp'],
+                                        'OR:editedon:>=' => $m_user['timestamp'],
+                                    ),
+                                ),
+                            ));
+                            $user_data[$m_user['user_id']][$chat->id]['chat_count'] = $this->modx->getCount('RealMessengerMessage',$query);
+                            $last_user_id = $m_user['user_id'];
+                        }
+                    }
+                    $message['messages'] = implode("\r\n",$output);
+
+                    $notify->json = json_encode($message);
+                    $notify->save();
+                    $notify->send($user_data);
+                }
+                $ChatUser->timestamp = date('Y-m-d H:i:s');
+                $ChatUser->save();
+                return $this->success('',array('messages'=>implode("\r\n",$output)));
+            }    
+        }
+        return $this->error("error!");
+    }
+
+    public function prepCommentNotifyes($chat, $notify,$hash) {
+		$owner_uid = $this->modx->user->id;
+		if(isset($_SESSION['RealMessenger'][$hash]['ContactGroupsPageIds'])){
+            $ContactGroupsPageIds = $_SESSION['RealMessenger'][$hash]['ContactGroupsPageIds'];
+        }else{
+            $ContactGroupsPageIds = '';
+        }
+        if(isset($_SESSION['RealMessenger'][$hash]['ContactGroups'])){
+            $ContactGroups = $_SESSION['RealMessenger'][$hash]['ContactGroups'];
+        }else{
+            $ContactGroups = '';
+        }
+        $default = array(
+            'class' => 'RealMessengerChatUser',
+            'where' => [
+                //'RealMessengerChat.single'=>1,
+                'RealMessengerChatUser.chat'=>$chat->id,
+                'RealMessengerChatUser.user_id:!='=>$owner_uid,
+            ],
+            'leftJoin' => [
+                'modUserGroupMember'=>[
+                    'class'=>'modUserGroupMember',
+                    'on'=>'modUserGroupMember.member = RealMessengerChatUser.user_id',
+                ],
+            ],
+            'select' => [
+                'RealMessengerChatUser'=>'RealMessengerChatUser.user_id,RealMessengerChatUser.timestamp',
+                'modUserGroupMember'=>'modUserGroupMember.user_group',
+            ],
+            'sortby'=>[
+                'RealMessengerChatUser.user_id'=>'ASC',
+            ],
+            'limit'=>100,
+            'return' => 'data',
+        );
+        
+        $this->pdoTools->setConfig($default, false);
+        $messenger_users = $this->pdoTools->run();
+
+		//$messenger_users = $chat->getMany('ChatUsers');
+        
+        $ContactGroups = explode(",",$ContactGroups);
+        $ContactGroupsPageIds = explode(",",$ContactGroupsPageIds);
+        $ContactGroupsPageIds0 = [];
+        foreach($ContactGroups as $cgk => $cg){
+            if(isset($ContactGroupsPageIds[$cgk])){
+                $ContactGroupsPageIds0[$cgk] = $ContactGroupsPageIds[$cgk];
+            }else{
+                $ContactGroupsPageIds0[$cgk] = $ContactGroupsPageIds[0];
+            }
+        }
+		if (!$notify) {
+			return;// 'Could not load gtsNotify class!';
+		}
+        foreach($messenger_users as $chatuser){
+            foreach($ContactGroups as $cgk => $cg){    
+                if($chatuser['user_group'] == $cg)
+                    $url = $this->modx->makeUrl($ContactGroupsPageIds0[$cgk], '', array('user_id' => $owner_uid));
+            }
+            $notify->addPurpose($chatuser['user_id'],'RealMessenger',$url);
+        }
+        return $messenger_users;
+    }
+    
+    public function find_or_new_chat($data)
+    {
+        //$chat = $data['chat'];
+        $user_id = $this->modx->user->id;
+        $hash = $data['hash'];
+        $new_chat_user_id = $data['new_chat_user_id'];
+        if(empty($hash)) $hash = $this->config['hash'];
+
+        $default = array(
+            'class' => 'RealMessengerChatUser',
+            'where' => [
+                'RealMessengerChat.single'=>1,
+                'RealMessengerChatUser.user_id'=>$user_id,
+                'RealMessengerChatUser2.user_id'=>$new_chat_user_id,
+            ],
+            'leftJoin' => [
+                'RealMessengerChatUser2'=>[
+                    'class'=>'RealMessengerChatUser',
+                    'on'=>'RealMessengerChatUser.chat = RealMessengerChatUser2.chat',
+                ],
+                'RealMessengerChat'=>[
+                    'class'=>'RealMessengerChat',
+                    'on'=>'RealMessengerChatUser.chat = RealMessengerChat.id',
+                ],
+            ],
+            'select' => [
+                'RealMessengerChat'=>'*',
+            ],
+            'limit'=>1,
+            'return' => 'data',
+        );
+        
+        $this->pdoTools->setConfig($default, false);
+        $rows = $this->pdoTools->run();
+        if(count($rows) == 0){ // чата не найдено. создаем новый
+            //добавить проверку на группу надо еще
+            if($chat = $this->modx->newObject('RealMessengerChat',['createdon'=>date('Y-m-d H:i:s'),'createdby'=>$user_id])){
+                if($chat->save()){
+                    if($ChatUserOun = $this->modx->newObject('RealMessengerChatUser',['user_id'=>$user_id,'chat'=>$chat->id,'timestamp'=>date('Y-m-d H:i:s')])){
+                        if($ChatUserOun->save()){
+                            if($ChatUser = $this->modx->newObject('RealMessengerChatUser',['user_id'=>$new_chat_user_id,'chat'=>$chat->id,'timestamp'=>date('Y-m-d H:i:s')])){
+                                $ChatUser->save();
+                                $rows = $this->pdoTools->run();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if(count($rows) > 0){  
+            if(isset($_SESSION['RealMessenger'][$hash]['MessagesTpl'])){
+                $MessagesTpl = $_SESSION['RealMessenger'][$hash]['MessagesTpl'];
+            }else{
+                $MessagesTpl = 'tpl.RealMessenger.messages';
+            }
+            if(isset($_SESSION['RealMessenger'][$hash]['ChatTpl'])){
+                $ChatTpl = $_SESSION['RealMessenger'][$hash]['ChatTpl'];
+            }else{
+                $ChatTpl = 'tpl.RealMessenger.chat';
+            }
+            $output = [];
+            $active_chat = 0;
+            foreach($rows as $row){
+                //собеседники
+                $default_users = array(
+                    'class' => 'RealMessengerChat',
+                    'where' => [
+                        'RealMessengerChatUser.user_id:!='=>$user_id,
+                        'RealMessengerChat.id'=> $row['id'],
+                    ],
+                    'leftJoin' => [
+                        'RealMessengerChatUser'=>[
+                            'class'=>'RealMessengerChatUser',
+                            'on'=>'RealMessengerChatUser.chat = RealMessengerChat.id',
+                        ],
+                        'modUser'=>[
+                            'class'=>'modUser',
+                            'on'=>'modUser.id = RealMessengerChatUser.user_id',
+                        ],
+                        'modUserProfile'=>[
+                            'class'=>'modUserProfile',
+                            'on'=>'modUserProfile.internalKey = RealMessengerChatUser.user_id',
+                        ],
+                    ],
+                    'select' => [
+                        //'RealMessengerChat'=>'*',
+                        'modUser'=>$this->modx->getSelectColumns('modUser','modUser','',array('id','username')),
+                        'modUserProfile'=>$this->modx->getSelectColumns('modUserProfile','modUserProfile','',array(
+                            'id','internalKey','blocked','blockeduntil','blockedafter','logincount','thislogin','failedlogincount'
+                            ,'sessionid'
+                            ),true),
+                    ],
+                    'sortby'=>['RealMessengerChatUser.id'=>'ASC'],
+                    'limit'=>10,
+                    //'groupby'=>'RealMessengerChat.id',
+                    'return' => 'data',
+                );
+                $this->pdoTools->setConfig($default_users, false);
+                $row['users'] = $this->pdoTools->run();
+                $row['user'] = $row['users'][0];
+                unset($row['users'][0]);
+
+                $row['class'] = 'active';
+                $output[] = $this->pdoTools->getChunk($ChatTpl,$row);
+                $active_chat = $row['id'];
+            }
+            
+            $messages = '';
+            $resp = $this->get_chat_messages(['chat'=> $active_chat]);
+            $messages = $this->pdoTools->getChunk($MessagesTpl, ['messages'=>$resp['data']['messages']]);
+
+            return $this->success('',[
+                'active_chat'=>$active_chat, 
+                'chat'=>implode("\r\n",$output),
+                'messages'=>$messages,
+                ]);
+        }else{
+            return $this->error("error no chat find!");
+        }
+
+        return $this->error("error!");
+    }
+
     public function get_chat_messages($data)
     {
         //$chat = $data['chat'];
         $user_id = $this->modx->user->id;
+        $hash = $data['hash'];
+        if(empty($hash)) $hash = $this->config['hash'];
         if($chat = $this->modx->getObject('RealMessengerChat',['id'=>(int)$data['chat'],'closed'=>0])
             and $ChatUser = $this->modx->getObject('RealMessengerChatUser',['chat'=>(int)$data['chat'],'user_id'=>$user_id])
             ){
+                $ChatUser->timestamp = date('Y-m-d H:i:s');
+                $ChatUser->save();
+
             $default = array(
                 'class' => 'RealMessengerMessage',
                 'where' => [
-                    //'gtsNotifyNotifyPurpose.active'=>1,
                     'RealMessengerMessage.chat'=>$chat->id,
                     'RealMessengerMessage.deleted'=> 0,
                 ],
@@ -168,24 +482,28 @@ class RealMessenger
             
             $this->pdoTools->setConfig($default, false);
             $rows = $this->pdoTools->run();
-            if(count($rows) > 0){
-                if(isset($_SESSION['RealMessenger'][$data['hash']]['MessageTpl'])){
-                    $MessageTpl = $_SESSION['RealMessenger'][$data['hash']]['MessageTpl'];
-                }else{
-                    $MessageTpl = 'tpl.RealMessenger.message';
-                }
-                $output = [];
-                foreach($rows as $row){
-                    if($gtsNotify) {
-                        $gtsNotify->remove_channel_notify($row['notify_id'],'RealMessenger');
-                    }
-                    $output[] = $this->pdoTools->getChunk($MessageTpl,$row);
-                }
-                return $this->success('',array('messages'=>implode("\r\n",$output)));
+            //if(count($rows) > 0){
+            if(isset($_SESSION['RealMessenger'][$hash]['MessageTpl'])){
+                $MessageTpl = $_SESSION['RealMessenger'][$hash]['MessageTpl'];
             }else{
-                return $this->error("error!");
+                $MessageTpl = 'tpl.RealMessenger.message';
             }
-                
+            $output = [];
+            $rows = array_reverse($rows);
+            $notify_ids = [];
+            foreach($rows as $row){
+                if($user_id == $row['createdby']) $row['ownmessage'] = 1;
+                $output[] = $this->pdoTools->getChunk($MessageTpl,$row);
+                $notify_ids[] = $row['notify_id'];
+            }
+
+            if($this->gtsNotify){
+                $user_data = []; //$user_data[$m_user['user_id']][$chat->id]['chat_count']
+                $user_data[$user_id][$chat->id]['chat_count'] = 0;
+                $this->gtsNotify->remove_channel_notifys($notify_ids,'RealMessenger',$user_data);
+            }
+            
+            return $this->success('',array('messages'=>implode("\r\n",$output)));    
         }
         return $this->error("error!");
     }
@@ -199,7 +517,6 @@ class RealMessenger
         $default = array(
             'class' => 'RealMessengerChat',
             'where' => [
-                //'gtsNotifyNotifyPurpose.active'=>1,
                 'RealMessengerChatUser.user_id'=>$user_id,
                 'RealMessengerChat.closed'=> 0,
             ],
@@ -208,23 +525,11 @@ class RealMessenger
                     'class'=>'RealMessengerChatUser',
                     'on'=>'RealMessengerChatUser.chat = RealMessengerChat.id',
                 ],
-                /*'modUser'=>[
-                    'class'=>'modUser',
-                    'on'=>'modUser.id = RealMessengerChatUser.user_id',
-                ],
-                'modUserProfile'=>[
-                    'class'=>'modUserProfile',
-                    'on'=>'modUserProfile.internalKey = RealMessengerChatUser.user_id',
-                ],*/
 
             ],
             'select' => [
                 'RealMessengerChat'=>'*',
-                /*'modUser'=>$this->modx->getSelectColumns('modUser','modUser','',array('username')),
-                'modUserProfile'=>$this->modx->getSelectColumns('modUserProfile','modUserProfile','',array(
-                    'id','internalKey','blocked','blockeduntil','blockedafter','logincount','thislogin','failedlogincount'
-                    ,'sessionid'
-                    ),true),*/
+                'RealMessengerChatUser'=>'RealMessengerChatUser.timestamp as user_timestamp',
             ],
             'sortby'=>['RealMessengerChatUser.timestamp'=>'DESC'],
             'limit'=>10,
@@ -235,25 +540,24 @@ class RealMessenger
         $this->pdoTools->setConfig($default, false);
         $rows = $this->pdoTools->run();
         if(count($rows) > 0){
-            if(isset($_SESSION['RealMessenger'][$data['hash']]['ChatTpl'])){
-                $ChatTpl = $_SESSION['RealMessenger'][$data['hash']]['ChatTpl'];
+            //$hash = $data['hash'];
+            if(empty($hash)) $hash = $this->config['hash'];
+            if(isset($_SESSION['RealMessenger'][$hash]['ChatTpl'])){
+                $ChatTpl = $_SESSION['RealMessenger'][$hash]['ChatTpl'];
             }else{
                 $ChatTpl = 'tpl.RealMessenger.chat';
             }
             $output = [];
             foreach($rows as $row){
-                if($gtsNotify) {
-                    $gtsNotify->remove_channel_notify($row['notify_id'],'RealMessenger');
-                }
                 
                 //считаем новые сообщения
-                $query = $xpdo->newQuery('RealMessengerMessage');
+                $query = $this->modx->newQuery('RealMessengerMessage');
                 $query->where(array(
                     array(
                         'chat:=' => $row['id'],
                         array(
-                            'AND:createdon:>=' => $row['timestamp'],
-                            'OR:createdon:>=' => $row['timestamp'],
+                            'AND:createdon:>=' => $row['user_timestamp'],
+                            'OR:editedon:>=' => $row['user_timestamp'],
                         ),
                     ),
                 ));
@@ -300,7 +604,7 @@ class RealMessenger
                     //'groupby'=>'RealMessengerChat.id',
                     'return' => 'data',
                 );
-                $this->pdoTools->setConfig($default, false);
+                $this->pdoTools->setConfig($default_users, false);
                 $row['users'] = $this->pdoTools->run();
                 $row['user'] = $row['users'][0];
                 unset($row['users'][0]);
@@ -317,8 +621,10 @@ class RealMessenger
 
     public function search_contact($ContactGroups = false)
     {
-        if(isset($_SESSION['RealMessenger'][$data['hash']]['SearchContactTpl'])){
-            $SearchContactTpl = $_SESSION['RealMessenger'][$data['hash']]['SearchContactTpl'];
+        //$hash = $data['hash'];
+        if(empty($hash)) $hash = $this->config['hash'];
+        if(isset($_SESSION['RealMessenger'][$hash]['SearchContactTpl'])){
+            $SearchContactTpl = $_SESSION['RealMessenger'][$hash]['SearchContactTpl'];
         }else{
             $SearchContactTpl = 'tpl.RealMessenger.search.contact';
         }
@@ -333,9 +639,11 @@ class RealMessenger
 
         $select['pdoTools'] = $pdoUser;
         if(empty($select['content'])) $select['content'] = '{$fullname}';
-        
+        $select['where'] = [
+            'modUserProfile.fullname:LIKE'=> '%query%',
+        ];
 
-        $_SESSION['RealMessenger'][$data['hash']]['search_contact'] =  $select;
+        $_SESSION['RealMessenger'][$hash]['search_contact'] =  $select;
 
         $output = $this->pdoTools->getChunk($SearchContactTpl, $select);
         return $this->success('',array('search_contact'=>$output));     
@@ -345,10 +653,11 @@ class RealMessenger
     public function autocomplect_search_contact($data)
     {
         $hash = $data['hash'];
-        if(isset($_SESSION['RealMessenger'][$data['hash']]['search_contact'])){
-            $select = $_SESSION['RealMessenger'][$data['hash']]['search_contact'];
+        if(empty($hash)) $hash = $this->config['hash'];
+        if(isset($_SESSION['RealMessenger'][$hash]['search_contact'])){
+            $select = $_SESSION['RealMessenger'][$hash]['search_contact'];
         }else{
-            return $this->error("select $select_name не найден!");
+            return $this->error("select search_contact не найден!");
         }
 
         $select['pdoTools']['limit'] = 0;
@@ -366,6 +675,7 @@ class RealMessenger
             }
             if(!empty($where)){
                 if(empty($select['pdoTools']['where'])) $select['pdoTools']['where'] = [];
+                if(is_string($select['pdoTools']['where'])) $select['pdoTools']['where'] = json_decode($select['pdoTools']['where'],1);
                 $select['pdoTools']['where'] = array_merge($select['pdoTools']['where'],$where);
             }
         
@@ -645,4 +955,58 @@ class RealMessenger
         //$this->pdoTools->addTime('Query parameters ready');
         return array_merge($default, $sp);
     }
+    
+    /**
+	 * Sanitize any text through Jevix snippet
+	 *
+	 * @param string $text Text for sanitization
+	 * @param string $setName Name of property set for get parameters from
+	 * @param boolean $replaceTags Replace MODX tags?
+	 *
+	 * @return string
+	 */
+	public function Jevix($text = null, $setName = 'RealMessenger', $replaceTags = true) {
+		if (empty($text)) {
+			return ' ';
+		}
+		if (!$snippet = $this->modx->getObject('modSnippet', array('name' => 'Jevix'))) {
+			return 'Could not load snippet Jevix';
+		}
+		// Loading parser if needed - it is for mgr context
+		if (!is_object($this->modx->parser)) {
+			$this->modx->getParser();
+		}
+
+		$params = array();
+		if ($setName) {
+			$params = $snippet->getPropertySet($setName);
+		}
+
+		$text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
+		$params['input'] = str_replace(
+			array('[', ']', '{', '}'),
+			array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+			$text
+		);
+
+		$snippet->setCacheable(false);
+		$filtered = $snippet->process($params);
+
+		if ($replaceTags) {
+			$filtered = str_replace(
+				array('*(*(*(*(*(*', '*)*)*)*)*)*', '`', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+				array('&#91;', '&#93;', '&#96;', '&#123;', '&#125;'),
+				$filtered
+			);
+		}
+		else {
+			$filtered = str_replace(
+				array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+				array('[', ']', '{', '}'),
+				$filtered
+			);
+		}
+
+		return $filtered;
+	}
 }

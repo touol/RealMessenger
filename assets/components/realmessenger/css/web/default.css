@@ -1,0 +1,40 @@
+#realmesseger {
+    width:99%;
+}
+.realmessenger-autocomplect-all{
+    width: 36px;
+}
+.realmessenger-autocomplect-menu{
+    position: absolute;
+    top: auto;
+    left: auto;
+}
+.realmessenger-chat{
+    border: 1px solid #cdcdcd;
+    display: flex;
+    margin-bottom: 10px;
+    padding: 10px;
+    color: #000;
+    line-height: 23px;
+}
+.realmessenger-chat.active{
+    background:  #cdcdcd;
+}
+.realmessenger-chat img{
+    width: 100px;
+    height: 100px;
+    vertical-align: middle;
+}
+.realmessenger-chat .description{
+    width: calc(100% - 90px);
+    padding-left: 20px;
+}
+.realmessenger-message.ownmessage{
+    margin: 0 0px 10px 0;
+}
+#realmessenger-messages{
+    overflow:scroll;
+    overflow-x:hidden;
+    overflow-y: auto;
+    height: 600px;
+}

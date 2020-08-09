@@ -41,16 +41,20 @@
 		<field key="createdon" dbtype="datetime" phptype="datetime" null="true" />
 		<field key="createdby" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" default="0" />
 
+        <field key="single" dbtype="tinyint" precision="1" phptype="boolean" attributes="unsigned" null="false" default="1" />
 		<field key="closed" dbtype="tinyint" precision="1" phptype="boolean" attributes="unsigned" null="false" default="0" />
 
 		<field key="properties" dbtype="text" phptype="json" null="true" />
 
-		<index alias="name" name="name" primary="false" unique="true" type="BTREE">
+		<index alias="name" name="name" primary="false" unique="false" type="BTREE">
 			<column key="name" length="" collation="A" null="false" />
 		</index>
 
 		<index alias="closed" name="closed" primary="false" unique="false" type="BTREE">
 			<column key="closed" length="" collation="A" null="false" />
+		</index>
+        <index alias="single" name="single" primary="false" unique="false" type="BTREE">
+			<column key="single" length="" collation="A" null="false" />
 		</index>
 
 		<composite alias="Messages" class="RealMessengerMessage" local="id" foreign="chat" cardinality="many" owner="local" />

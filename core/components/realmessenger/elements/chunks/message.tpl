@@ -1,4 +1,4 @@
-<li class="{if $ownmessage}ownmessage{/if} realmessenger-message {$comment_new}" 
+<li class="{if $ownmessage}ownmessage{/if} realmessenger-message {$messag_new}" 
     id="message-{$id}" data-id="{$id}">
 	<div class="name">
 		<a href="#"><img src="{$avatar}" alt="" height="38" width="37"></a>

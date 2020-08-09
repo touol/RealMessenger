@@ -29,4 +29,12 @@ return [
         'file' => 'email',
         'description' => '',
     ],
+    'tpl.RealMessenger.search.contact' => [
+        'file' => 'search.contact',
+        'description' => '',
+    ],
+    'tpl.RealMessenger.notify' => [
+        'file' => 'notify',
+        'description' => '',
+    ],
 ];
