@@ -11,27 +11,29 @@
 	</div>
 	
 	 <div class="files">
-                {*$_modx->runSnippet('!pdoResources', [
-                    'class' => 'UserFile',
-                    'loadModels' => 'UserFiles',
-                    'limit' => 10,
-                    'tpl' => 'tpl.file.item',
-                    'leftJoin' => '{
-                        "Thumb": {
-                            "class": "UserFile",
-                            "on": "Thumb.parent = UserFile.id AND Thumb.properties LIKE \'%w\":120,\"h\":90%\'"
-                        }
-                    }',
-                    'select' => '{
-                        "UserFile": "*",
-                        "Thumb": "Thumb.url as thumb"
-                    }',
-                    'where' => '{
-                        "UserFile.class": "modUser",
-                        "UserFile.list": "comment-' ~ $id ~ '"
-                        
-                    }',
-                    'sortby' => '{"rank":"ASC"}',
-                ])*}  
-        </div>
+        {if $file_ids}
+            {$_modx->runSnippet('!pdoResources', [
+                'class' => 'UserFile',
+                'loadModels' => 'UserFiles',
+                'limit' => 10,
+                'tpl' => 'tpl.file.item',
+                'leftJoin' => '{
+                    "Thumb": {
+                        "class": "UserFile",
+                        "on": "Thumb.parent = UserFile.id AND Thumb.properties LIKE \'%w\":120,\"h\":90%\'"
+                    }
+                }',
+                'select' => '{
+                    "UserFile": "*",
+                    "Thumb": "Thumb.url as thumb"
+                }',
+                'where' => [
+                    "UserFile.class"=> "modUser",
+                    "UserFile.id IN (" ~ $file_ids ~ ")",
+                ],
+                'sortby' => '{"rank":"ASC"}',
+                'showLog' => 1
+            ])}
+        {/if}
+    </div>
 </li>

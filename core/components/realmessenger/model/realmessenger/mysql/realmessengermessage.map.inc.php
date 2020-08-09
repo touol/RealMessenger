@@ -22,6 +22,7 @@ $xpdo_meta_map['RealMessengerMessage']= array (
     'deletedon' => NULL,
     'deletedby' => 0,
     'notify_id' => 0,
+    'file_ids' => '',
     'properties' => NULL,
   ),
   'fieldMeta' => 
@@ -119,6 +120,14 @@ $xpdo_meta_map['RealMessengerMessage']= array (
       'attributes' => 'unsigned',
       'null' => false,
       'default' => 0,
+    ),
+    'file_ids' => 
+    array (
+      'dbtype' => 'varchar',
+      'precision' => '250',
+      'phptype' => 'string',
+      'null' => false,
+      'default' => '',
     ),
     'properties' => 
     array (

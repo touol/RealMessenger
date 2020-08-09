@@ -124,6 +124,9 @@ class RealMessenger
             case 'save_message': 
                 return $this->save_message($data);
                 break;
+            case 'send_read_messages': 
+                return $this->send_read_messages($data);
+                break;
             case 'find_or_new_chat': 
                 return $this->find_or_new_chat($data);
                 break;
@@ -135,6 +138,11 @@ class RealMessenger
         }
     }
     
+    public function send_read_messages($data)
+    {
+        return $this->get_chat_messages($data);
+    }
+
     public function save_message($data)
     {
         //$chat = $data['chat'];
@@ -156,10 +164,11 @@ class RealMessenger
             $message = [
                 'chat'=>$chat->id,
                 'raw'=> trim($data['text']),
-                'text'=> $this->Jevix($data['text'], 'Comment'),
+                'text'=> $this->Jevix($data['text'], 'RealMessenger'),
                 'ip' => '',//$ip['ip'],
                 'createdon' => date('Y-m-d H:i:s'),
                 'createdby' => $user_id,
+                'file_ids'=> $this->Jevix($data['file_ids'], 'RealMessenger'),
             ];
             if ($this->gtsNotify) {
                 if($notify = $this->gtsNotify->create_notify($message)){
@@ -228,8 +237,8 @@ class RealMessenger
                                 array(
                                     'chat:=' => $chat->id,
                                     array(
-                                        'AND:createdon:>=' => $m_user['timestamp'],
-                                        'OR:editedon:>=' => $m_user['timestamp'],
+                                        'AND:createdon:>' => $m_user['timestamp'],
+                                        'OR:editedon:>' => $m_user['timestamp'],
                                     ),
                                 ),
                             ));
@@ -556,8 +565,8 @@ class RealMessenger
                     array(
                         'chat:=' => $row['id'],
                         array(
-                            'AND:createdon:>=' => $row['user_timestamp'],
-                            'OR:editedon:>=' => $row['user_timestamp'],
+                            'AND:createdon:>' => $row['user_timestamp'],
+                            'OR:editedon:>' => $row['user_timestamp'],
                         ),
                     ),
                 ));

@@ -16,6 +16,9 @@ if ($transport->xpdo) {
                             'icon' => 'glyphicon glyphicon-envelope',
                             'icon_empty' => 'glyphicon glyphicon-envelope',
                             'tpl' => 'tpl.RealMessenger.notify',
+                            'email_send' => 1,
+                            'email_tpl' => 'tpl.RealMessenger.email',
+                            'email_sleep' => 300,
                             ])) {
                             if($channel->save()){
                                 

@@ -21,6 +21,8 @@
 
 		<field key="notify_id" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" default="0" />
 
+        <field key="file_ids" dbtype="varchar" precision="250" phptype="string" null="false" default="" />
+
 		<field key="properties" dbtype="text" phptype="json" null="true" />
 
 		<index alias="chat" name="chat" primary="false" unique="false" type="BTREE">

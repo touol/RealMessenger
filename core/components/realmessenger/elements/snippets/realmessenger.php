@@ -23,15 +23,17 @@ $FormTpl = $modx->getOption('FormTpl', $scriptProperties, 'tpl.RealMessenger.for
 
 
 $with_user_id = (int)$_GET['user_id'];
-if((int)$with_user_id){
+if($with_user_id){
     //ишем или создаем чат с юзером
+    $resp = $RealMessenger->find_or_new_chat(['new_chat_user_id'=>$with_user_id]);
+    if($resp['success']) $active_chat = $resp['data']['active_chat'];
 }
 
 $messages = '';
 $resp = $RealMessenger->get_chat_messages(['chat'=> $active_chat]);
 $messages = $RealMessenger->pdoTools->getChunk($MessagesTpl, ['messages'=>$resp['data']['messages']]);
 
-$form = $RealMessenger->pdoTools->getChunk($FormTpl, []);
+$form = $RealMessenger->pdoTools->getChunk($FormTpl, ['chat'=> $active_chat]);
 
 $chats = '';
 $resp = $RealMessenger->get_chats($active_chat);

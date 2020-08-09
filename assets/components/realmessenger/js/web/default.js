@@ -20,6 +20,7 @@
             load: RealMessengerConfig.callbacksObjectTemplate(),
             remove: RealMessengerConfig.callbacksObjectTemplate(),
             save_message: RealMessengerConfig.callbacksObjectTemplate(),
+            send_read_messages: RealMessengerConfig.callbacksObjectTemplate(),
         },
         Autocomplect: {
             load: RealMessengerConfig.callbacksObjectTemplate(),
@@ -82,13 +83,6 @@
     };
     RealMessenger.initialize = function () {
         RealMessenger.setup();
-        
-        //noinspection JSUnresolvedFunction
-        /*RealMessenger.$doc
-            .on('submit', RealMessenger.form, function (e) {
-                e.preventDefault();
-                
-            });*/
             
         RealMessenger.Chat.initialize();
         RealMessenger.Autocomplect.initialize();
@@ -166,6 +160,7 @@
             load: RealMessengerConfig.callbacksObjectTemplate(),
             remove: RealMessengerConfig.callbacksObjectTemplate(),
             save_message: RealMessengerConfig.callbacksObjectTemplate(),
+            send_read_messages: RealMessengerConfig.callbacksObjectTemplate(),
         },
         
         initialize: function () {
@@ -212,10 +207,20 @@
                     
                     e.preventDefault();
                     hash = $(this).closest('#realmesseger').data('hash');
+                    
                     $form = $(this);
+                    file_ids = [];
+                    $('.dz-image-preview').each(function( index ) {
+                        file_ids.push($(this).data('userfiles-id'));
+                        $(this).remove();
+                    });
+                    $form.find('[name=file_ids]').val(file_ids.join());
                     RealMessenger.sendData.$form = $form;
                     var formData = $form.serializeArray();
- 
+
+                    if($(this).find('textarea').val() == '') return;
+                    $form.find('textarea').val('');
+                    
                     RealMessenger.sendData.data = {
                         hash: hash,
                         action: 'save_message',
@@ -235,7 +240,29 @@
                     RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Chat.callbacks.save_message, RealMessenger.Callbacks.Chat.save_message);
                 
                 });
+            RealMessenger.$doc
+                .on('keyup', 'form#realmessenger-message-form textarea', function (e) {
+                    
+                    //e.preventDefault();
+                    $el_chat = $('.realmessenger-chat.active');
+                    if($el_chat.find('.messages-new-count').text() == 0) return;
+
+                    hash = $(this).closest('#realmesseger').data('hash');
+                    RealMessenger.sendData.$el_chat = $el_chat;
+
+                    RealMessenger.sendData.data = {
+                        hash: hash,
+                        action: 'send_read_messages',
+                        chat: $el_chat.data('id'),
+                    };
+                    var callbacks = RealMessenger.Chat.callbacks;
             
+                    callbacks.send_read_messages.response.success = function (response) {
+                        $el_chat = RealMessenger.sendData.$el_chat;
+                    };
+                    RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Chat.callbacks.send_read_messages, RealMessenger.Callbacks.Chat.send_read_messages);
+                
+                });
             document.addEventListener("gtsnotifyprovider", function(event) { 
                 console.log('notify',event.detail);
                 for(var key in event.detail.channels) {
@@ -253,6 +280,8 @@
                                     $messages = $(event.detail.data.messages);
                                     $messages.removeClass('ownmessage');
                                     $('#realmessenger-messages').append($messages);
+                                    var d = $('#realmessenger-messages');
+                                    d.scrollTop(d.prop("scrollHeight"));
                                 }
                             }
                         }
