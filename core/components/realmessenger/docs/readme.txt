@@ -1,7 +1,42 @@
 --------------------
 RealMessenger
 --------------------
-Author: Andrey Stepanenko <info@bustep.ru>
+Author: Alexandr Tuniekov <touols@yandex.ru>
 --------------------
 
-A basic Extra for MODx Revolution.
+RealMessenger - realtime мессенджер для modx.
+Требуется bootstrap 3. На bootstrap 4 не тестировал, но поедет только верстка. Я не спец по верстке и на другие css фреймворки требуется оформить их самостаятельно.
+
+#Установка 
+Установить getTables.
+Установить gtsNotify. Настроить для него провайдера и активировать(Поставить чекбокс активно). 
+На данный момент доступен только wss://wss.gtsnotify.ru:8081. Тарифы уточняйте на gtsnotify.ru.
+В хедере вывести сниппет gtsNotify. 
+Установить UserFiles.
+Установить RealMessenger.
+
+#Настройка
+На нужную страницу вывести сниппет RealMessenger.
+Доступные параметры сниппета:
+ContactGroups - список групп пользователей с которыми может переписываться пользователь через запятую. По умолчанию стоит 2 - id второй группы пользователей
+ContactGroupsPageIds - список id страниц, через запятую, на которых установлен сниппет RealMessenger для этой группы. По умолчанию текущая страница. Порядок id страниц соответствует порядку списка групп пользователей.
+Эти параметры нужны, чтобы организовать переписку между разными группами пользователей. Например между врачами и пациентами.
+
+Параметры чанков:
+OuterTpl - по умолчанию tpl.RealMessenger.outer - общий чанк.
+ChatsTpl - по умолчанию tpl.RealMessenger.chats - общий чанк чатов(списка контактов слева).
+ChatTpl - по умолчанию tpl.RealMessenger.chat - чанк чата.
+MessagesTpl - по умолчанию tpl.RealMessenger.messages - общий чанк сообщений.
+MessageTpl - по умолчанию tpl.RealMessenger.message - чанк сообщения.
+SearchContactTpl - по умолчанию tpl.RealMessenger.search.contact - чанк панели поика контактов.
+
+Параметры канала gtsNotify:
+Имя - RealMessenger
+Иконка - 
+Иконка пустого канала - 
+Чанк - tpl.RealMessenger.notify - чанк уведомления в меню gtsNotify.
+Отправлять по email - активно
+Чанк email - tpl.RealMessenger.email - чанк email уведомления.
+Задержка email для того, чтобы юзерам онлайн не приходили письма - 300 - в секундах
+
+Для отправки уведомлений по емаил нужно пставить в крон на каждую минуту файл core/components/gtsnotify/cron/email_send.php

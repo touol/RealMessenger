@@ -83,6 +83,8 @@
     };
     RealMessenger.initialize = function () {
         RealMessenger.setup();
+        var d = $('#realmessenger-messages');
+        d.scrollTop(d.prop("scrollHeight"));
             
         RealMessenger.Chat.initialize();
         RealMessenger.Autocomplect.initialize();
@@ -220,7 +222,7 @@
 
                     if($(this).find('textarea').val() == '') return;
                     $form.find('textarea').val('');
-                    
+
                     RealMessenger.sendData.data = {
                         hash: hash,
                         action: 'save_message',

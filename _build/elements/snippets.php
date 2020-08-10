@@ -37,10 +37,6 @@ return [
                 'type' => 'textfield',
                 'value' => 'tpl.RealMessenger.form',
             ],
-            'EmailTpl' => [
-                'type' => 'textfield',
-                'value' => 'tpl.RealMessenger.email',
-            ],
             'SearchContactTpl' => [
                 'type' => 'textfield',
                 'value' => 'tpl.RealMessenger.search.contact',
