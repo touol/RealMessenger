@@ -103,6 +103,19 @@ class RealMessenger
                         }
                     }
                     if(empty($this->config['ContactGroupsPageIds'])) $this->config['ContactGroupsPageIds'] = $this->modx->resource->id;
+                    $ContactGroups = explode(',',$this->config['ContactGroups']);
+                    $ContactGroups0 = [];
+                    foreach($ContactGroups as $cg){
+                        $cg = trim($cg);
+                        if((int)$cg > 0){
+                            $ContactGroups0[] = $cg;
+                        }else{
+                            if($g = $this->modx->getObject('modUserGroup',['name'=>$cg])){
+                                $ContactGroups0[] = $g->id;
+                            }
+                        }
+                    }
+                    $this->config['ContactGroups'] = implode(',',$ContactGroups0);
                     $_SESSION['RealMessenger'][$this->config['hash']] = $this->config;
                     /*if(isset($_SESSION['getTables'][$this->config['hash']][$gts_class][$gts_name]))
 			        return $_SESSION['getTables'][$this->config['hash']][$gts_class][$gts_name];*/
@@ -331,6 +344,12 @@ class RealMessenger
         $hash = $data['hash'];
         $new_chat_user_id = $data['new_chat_user_id'];
         if(empty($hash)) $hash = $this->config['hash'];
+        
+        if(isset($_SESSION['RealMessenger'][$hash]['ContactGroups'])){
+            $ContactGroups = $_SESSION['RealMessenger'][$hash]['ContactGroups'];
+        }else{
+            $ContactGroups = '2';
+        }
 
         $default = array(
             'class' => 'RealMessengerChatUser',
@@ -360,6 +379,12 @@ class RealMessenger
         $rows = $this->pdoTools->run();
         if(count($rows) == 0){ // чата не найдено. создаем новый
             //добавить проверку на группу надо еще
+            if(!$cg = $this->modx->getObject('modUserGroupMember',[
+                'member'=>$new_chat_user_id,
+                'user_group:IN'=>explode(',',$ContactGroups),
+                ])){
+                    return $this->error("user is not ContactGroups member!");
+            }
             if($chat = $this->modx->newObject('RealMessengerChat',['createdon'=>date('Y-m-d H:i:s'),'createdby'=>$user_id])){
                 if($chat->save()){
                     if($ChatUserOun = $this->modx->newObject('RealMessengerChatUser',['user_id'=>$user_id,'chat'=>$chat->id,'timestamp'=>date('Y-m-d H:i:s')])){
@@ -628,7 +653,7 @@ class RealMessenger
         return $this->error("error!");
     }
 
-    public function search_contact($ContactGroups = false)
+    public function search_contact()
     {
         //$hash = $data['hash'];
         if(empty($hash)) $hash = $this->config['hash'];
@@ -636,6 +661,11 @@ class RealMessenger
             $SearchContactTpl = $_SESSION['RealMessenger'][$hash]['SearchContactTpl'];
         }else{
             $SearchContactTpl = 'tpl.RealMessenger.search.contact';
+        }
+        if(isset($_SESSION['RealMessenger'][$hash]['ContactGroups'])){
+            $ContactGroups = $_SESSION['RealMessenger'][$hash]['ContactGroups'];
+        }else{
+            $ContactGroups = '2';
         }
         $select = [];
         $select['fields'] = 'id,fullname';

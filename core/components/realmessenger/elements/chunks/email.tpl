@@ -1,6 +1,6 @@
-{$fullname} оставил Вам сообщение! перейдите по ссылке чтобы прочитать его!
+{$json.fullname} оставил Вам сообщение! перейдите по ссылке чтобы прочитать его!
 
-<a href="{if $purpose_url}{$purpose_url}{else}{$url}{/if}">
+<a href="{'site_url' | option}{if $purpose_url}{$purpose_url}{else}{$url}{/if}">
     <div class="name">
     	<span>{$json.fullname}</span>
     </div>

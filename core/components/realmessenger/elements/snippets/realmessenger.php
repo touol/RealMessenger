@@ -21,8 +21,9 @@ $MessagesTpl = $modx->getOption('MessagesTpl', $scriptProperties, 'tpl.RealMesse
 $FormTpl = $modx->getOption('FormTpl', $scriptProperties, 'tpl.RealMessenger.form');
 
 
+if(isset($_GET['user_id'])) $with_user_id = (int)$_GET['user_id'];
+if(isset($_GET['doctor_id'])) $with_user_id = (int)$_GET['doctor_id'];
 
-$with_user_id = (int)$_GET['user_id'];
 if($with_user_id){
     //ишем или создаем чат с юзером
     $resp = $RealMessenger->find_or_new_chat(['new_chat_user_id'=>$with_user_id]);
@@ -40,7 +41,7 @@ $resp = $RealMessenger->get_chats($active_chat);
 $chats = $RealMessenger->pdoTools->getChunk($ChatsTpl, ['chats'=>$resp['data']['chats']]);
 
 $search_contact = '';
-$resp = $RealMessenger->search_contact($ContactGroups);
+$resp = $RealMessenger->search_contact();
 $search_contact = $resp['data']['search_contact'];
 
 $output = $RealMessenger->pdoTools->getChunk($OuterTpl,[
