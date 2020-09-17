@@ -1,5 +1,9 @@
 Changelog for RealMessenger.
 
+1.0.5-beta
+==============
+- исправление ошибок.
+
 1.0.0-beta
 ==============
 - New build script.

@@ -189,8 +189,11 @@
                         $(".realmessenger-chat").removeClass('active');
                         $chat.addClass('active');
                         $chat.find('.messages-new-count').hide();
-                        $(".realmessenger-chats").prepend($chat.clone());
-                        $chat.remove();
+                        $clone = $chat.clone();
+                        
+                        $('.realmessenger-chat[data-id=' + $chat.data('id') + ']').remove();
+                        $(".realmessenger-chats").prepend($clone);
+                        
                         $('#realmessenger-messages').html(response.data.messages);
                         var d = $('#realmessenger-messages');
                         d.scrollTop(d.prop("scrollHeight"));
@@ -212,7 +215,7 @@
                     
                     $form = $(this);
                     file_ids = [];
-                    $('.dz-image-preview').each(function( index ) {
+                    $('.dz-preview').each(function( index ) {
                         file_ids.push($(this).data('userfiles-id'));
                         $(this).remove();
                     });
@@ -220,7 +223,7 @@
                     RealMessenger.sendData.$form = $form;
                     var formData = $form.serializeArray();
 
-                    if($(this).find('textarea').val() == '') return;
+                    if($(this).find('textarea').val() == '' && file_ids.join() == '') return;
                     $form.find('textarea').val('');
 
                     RealMessenger.sendData.data = {
@@ -379,15 +382,6 @@
                     };
                     RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Autocomplect.callbacks.load, RealMessenger.Callbacks.Autocomplect.load);
                 });
-            /*RealMessenger.$doc
-                .on('change', '.realmessenger-autocomplect-content', function (e) {
-                    e.preventDefault();
-                    $autocomplect = $(this).closest('.realmessenger-autocomplect');
-                    if($(this).val() == ""){
-                        $autocomplect.find('.realmessenger-autocomplect-id').val(0);
-                        $autocomplect.find('.realmessenger-autocomplect-hidden-id').val(0).trigger('change');
-                    }
-                });*/
         },
     };
     $(document).ready(function ($) {
