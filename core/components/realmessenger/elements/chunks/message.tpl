@@ -1,7 +1,7 @@
 <li class="{if $ownmessage}ownmessage{/if} realmessenger-message {$messag_new}" 
     id="message-{$id}" data-id="{$id}">
 	<div class="name">
-		<a href="#"><img src="{$avatar}" alt="" height="38" width="37"></a>
+		<a href="#"><img src="{if !$user.photo}/assets/components/realmessenger/img/no_foto.png{else}{$avatar}{/if}" alt="" height="38" width="37"></a>
 		<span>{$fullname}</span>
 	</div>
 	<div class="realmessenger-message-body">
@@ -16,7 +16,7 @@
                 'class' => 'UserFile',
                 'loadModels' => 'UserFiles',
                 'limit' => 10,
-                'tpl' => 'tpl.file.item',
+                'tpl' => 'tpl.RealMessenger.file',
                 'leftJoin' => '{
                     "Thumb": {
                         "class": "UserFile",
@@ -32,7 +32,7 @@
                     "UserFile.id IN (" ~ $file_ids ~ ")",
                 ],
                 'sortby' => '{"rank":"ASC"}',
-                'showLog' => 1
+                'showLog' => 0
             ])}
         {/if}
     </div>

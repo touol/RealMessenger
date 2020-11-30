@@ -9,14 +9,13 @@
         
         <input type="submit" class="btn btn-primary submit" value="Отправить" title="Ctrl + Shift + Enter" />
         
-        <div class="wrap_file"><input type="file"></div>
     </form>
     {set $hash = '' | date : 'd.m.Y H:s' | md5}
     {'!ufForm' | snippet : [
             'anonym'=>1,
             'class'=>'modUser',
             'list'=>'chats-' ~ $hash,
-            'tplForm'=>'LK2.uf.form',
+            'tplForm'=>'uf.form',
             'allowedFiles'=>'jpg,jpeg,png,gif,doc,pdf,txt,xlsx,jnt,docx,zip,xls'
             'dropzone'=>'{ "maxFilesize":2,"maxFiles":5,"acceptedFiles":".jpg, .jpeg, .gif, .png, .docx, .doc, .pdf, .xls, .xlsx","template":"edit"}',
     ]}

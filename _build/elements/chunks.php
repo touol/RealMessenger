@@ -37,4 +37,8 @@ return [
         'file' => 'notify',
         'description' => '',
     ],
+    'tpl.RealMessenger.file' => [
+        'file' => 'file',
+        'description' => '',
+    ],
 ];

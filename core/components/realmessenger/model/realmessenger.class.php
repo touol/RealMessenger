@@ -285,12 +285,25 @@ class RealMessenger
         }else{
             $ContactGroups = '';
         }
+
+        $ContactGroups = explode(",",$ContactGroups);
+        $ContactGroupsPageIds = explode(",",$ContactGroupsPageIds);
+        $ContactGroupsPageIds0 = [];
+        foreach($ContactGroups as $cgk => $cg){
+            if(isset($ContactGroupsPageIds[$cgk])){
+                $ContactGroupsPageIds0[$cgk] = $ContactGroupsPageIds[$cgk];
+            }else{
+                $ContactGroupsPageIds0[$cgk] = $ContactGroupsPageIds[0];
+            }
+        }
+
         $default = array(
             'class' => 'RealMessengerChatUser',
             'where' => [
                 //'RealMessengerChat.single'=>1,
                 'RealMessengerChatUser.chat'=>$chat->id,
                 'RealMessengerChatUser.user_id:!='=>$owner_uid,
+                'modUserGroupMember.user_group:IN'=>$ContactGroups,
             ],
             'leftJoin' => [
                 'modUserGroupMember'=>[
@@ -302,6 +315,7 @@ class RealMessenger
                 'RealMessengerChatUser'=>'RealMessengerChatUser.user_id,RealMessengerChatUser.timestamp',
                 'modUserGroupMember'=>'modUserGroupMember.user_group',
             ],
+            'groupby'=>'RealMessengerChatUser.user_id',
             'sortby'=>[
                 'RealMessengerChatUser.user_id'=>'ASC',
             ],
@@ -314,16 +328,7 @@ class RealMessenger
 
 		//$messenger_users = $chat->getMany('ChatUsers');
         
-        $ContactGroups = explode(",",$ContactGroups);
-        $ContactGroupsPageIds = explode(",",$ContactGroupsPageIds);
-        $ContactGroupsPageIds0 = [];
-        foreach($ContactGroups as $cgk => $cg){
-            if(isset($ContactGroupsPageIds[$cgk])){
-                $ContactGroupsPageIds0[$cgk] = $ContactGroupsPageIds[$cgk];
-            }else{
-                $ContactGroupsPageIds0[$cgk] = $ContactGroupsPageIds[0];
-            }
-        }
+        
 		if (!$notify) {
 			return;// 'Could not load gtsNotify class!';
 		}
@@ -332,6 +337,7 @@ class RealMessenger
                 if($chatuser['user_group'] == $cg)
                     $url = $this->modx->makeUrl($ContactGroupsPageIds0[$cgk], '', array('user_id' => $owner_uid));
             }
+            //$this->modx->log(1,"notify->addPurpose {$chatuser['user_id']} $url ".print_r($messenger_users,1));
             $notify->addPurpose($chatuser['user_id'],'RealMessenger',$url);
         }
         return $messenger_users;
