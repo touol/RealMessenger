@@ -134,6 +134,9 @@ class RealMessenger
             case 'get_chat_messages': 
                 return $this->get_chat_messages($data);
                 break;
+            case 'close_chat': 
+                return $this->close_chat($data);
+                break;
             case 'save_message': 
                 return $this->save_message($data);
                 break;
@@ -143,14 +146,38 @@ class RealMessenger
             case 'find_or_new_chat': 
                 return $this->find_or_new_chat($data);
                 break;
-            case 'autocomplect_search_contact': 
-                return $this->autocomplect_search_contact($data);
+            case 'autocomplect_search_contact':
+                switch($data['search_goal']){
+                    case 'chat':
+                        return $this->autocomplect_search_chat($data);
+                        break;
+                    default:
+                        return $this->autocomplect_search_contact($data);
+                }
                 break;
             default:
                 return $this->error("Метод $action в классе $class не найден!");
         }
     }
-    
+
+    public function close_chat($data)
+    {
+        //$chat = $data['chat'];
+        $user_id = $this->modx->user->id;
+        $hash = $data['hash'];
+        if(empty($hash)) $hash = $this->config['hash'];
+        if($chat = $this->modx->getObject('RealMessengerChat',['id'=>(int)$data['chat'],'closed'=>0])
+            and $ChatUser = $this->modx->getObject('RealMessengerChatUser',['chat'=>(int)$data['chat'],'user_id'=>$user_id])
+            ){
+                $ChatUser->timestamp = date('Y-m-d H:i:s');
+                $ChatUser->closed = true;
+                $ChatUser->save();
+            
+            return $this->success('');    
+        }
+        return $this->error("error!");
+    }
+
     public function send_read_messages($data)
     {
         return $this->get_chat_messages($data);
@@ -465,6 +492,10 @@ class RealMessenger
             
             $messages = '';
             $resp = $this->get_chat_messages(['chat'=> $active_chat]);
+            if($ChatUser = $this->modx->getObject("RealMessengerChatUser",['chat'=>$active_chat,'user_id'=>$user_id])){
+                $ChatUser->closed = false;
+                $ChatUser->save();
+            }
             $messages = $this->pdoTools->getChunk($MessagesTpl, ['messages'=>$resp['data']['messages']]);
 
             return $this->success('',[
@@ -558,6 +589,7 @@ class RealMessenger
             'class' => 'RealMessengerChat',
             'where' => [
                 'RealMessengerChatUser.user_id'=>$user_id,
+                'RealMessengerChatUser.closed'=>0,
                 'RealMessengerChat.closed'=> 0,
             ],
             'leftJoin' => [
@@ -690,11 +722,91 @@ class RealMessenger
 
         $_SESSION['RealMessenger'][$hash]['search_contact'] =  $select;
 
-        $output = $this->pdoTools->getChunk($SearchContactTpl, $select);
+        $output = $this->pdoTools->getChunk($SearchContactTpl, []);
         return $this->success('',array('search_contact'=>$output));     
         return $this->error("error!");
     }
-    
+
+    public function search_chat()
+    {
+        if(empty($hash)) $hash = $this->config['hash'];
+        if(isset($_SESSION['RealMessenger'][$hash]['SearchContactTpl'])){
+            $SearchContactTpl = $_SESSION['RealMessenger'][$hash]['SearchContactTpl'];
+        }else{
+            $SearchContactTpl = 'tpl.RealMessenger.search.contact';
+        }
+        return $this->pdoTools->getChunk($SearchContactTpl, ['search_goal'=>'chat','search_goal_label'=>'Поиск чатов']);    
+    }
+
+    public function autocomplect_search_chat($data)
+    {
+        
+        //получаем чаты пользователя
+        $user_id = $this->modx->user->id;
+        $chats = [
+            'class' => 'RealMessengerChatUser',
+            'where' => [
+                'RealMessengerChatUser.user_id'=>$user_id,
+            ],
+            'select' => [
+                'RealMessengerChatUser'=>'RealMessengerChatUser.chat',
+            ],
+            'sortby'=>['RealMessengerChatUser.id'=>'ASC'],
+            'limit'=>0,
+            'return' => 'data',
+        ];
+        $this->pdoTools->setConfig($chats, false);
+        $chats0 = $this->pdoTools->run();
+        $chats_ids = [];
+        foreach($chats0 as $chat){
+            $chats_ids[] = $chat['chat'];
+        }
+        
+        $default = [
+            'class' => 'RealMessengerChat',
+            'leftJoin'=>[
+                'RealMessengerChatUser'=>[
+                    'class'=>'RealMessengerChatUser',
+                    'on'=>'RealMessengerChatUser.chat = RealMessengerChat.id',
+                ],
+                'modUser'=>[
+                    'class'=>'modUser',
+                    'on'=>'modUser.id = RealMessengerChatUser.user_id',
+                ],
+                'modUserProfile'=>[
+                    'class'=>'modUserProfile',
+                    'on'=>'modUserProfile.internalKey = RealMessengerChatUser.user_id',
+                ],
+            ],
+            'where' => [
+                'RealMessengerChat.id:IN'=>$chats_ids,
+                'RealMessengerChatUser.user_id:!='=>$user_id,
+            ],
+            'groupby'=>'RealMessengerChat.id',
+            'select' => [
+                'RealMessengerChatUser'=>'RealMessengerChatUser.user_id as id',
+                'modUserProfile'=>"GROUP_CONCAT(modUserProfile.fullname SEPARATOR ', ') as users_fullname",
+            ],
+            'sortby'=>['RealMessengerChatUser.id'=>'ASC'],
+            'limit'=>0,
+            'return' => 'data',
+        ];
+
+        $query = $data['query'];
+        if($query){
+            $default['where']['modUserProfile.fullname:LIKE'] = "%{$query}%";
+        }
+            
+        
+        $this->pdoTools->setConfig($default, false);
+        $rows = $this->pdoTools->run();
+        $output = [];
+        foreach($rows as $row){
+            $output[] = '<li><a href="#" data-id="'.$row['id'].'">'.$row['users_fullname'].'</a></li>';
+        }
+        return $this->success('',array('html'=>implode("\r\n",$output)));
+    }
+
     public function autocomplect_search_contact($data)
     {
         $hash = $data['hash'];

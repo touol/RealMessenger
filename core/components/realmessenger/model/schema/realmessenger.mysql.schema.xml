@@ -67,6 +67,7 @@
 		<field key="user_id" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" default="0" />
         <field key="chat" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" default="0" />
         <field key="timestamp" dbtype="datetime" phptype="datetime" null="false" />
+		<field key="closed" dbtype="tinyint" precision="1" phptype="boolean" attributes="unsigned" null="false" default="0" />
 
         <index alias="user_id" name="user_id" primary="false" unique="false" type="BTREE">
 			<column key="user_id" length="" collation="A" null="false" />
@@ -74,7 +75,10 @@
         <index alias="chat" name="chat" primary="false" unique="false" type="BTREE">
 			<column key="chat" length="" collation="A" null="false" />
 		</index>
-
+		<index alias="closed" name="closed" primary="false" unique="false" type="BTREE">
+			<column key="closed" length="" collation="A" null="false" />
+		</index>
+		
 		<aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign" />
 		<aggregate alias="UserProfile" class="modUserProfile" local="user_id" foreign="internalKey" cardinality="one" owner="foreign" />
 		<aggregate alias="Chat" class="RealMessengerChat" local="chat" foreign="id" cardinality="one" owner="foreign" />

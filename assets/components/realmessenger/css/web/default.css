@@ -11,7 +11,7 @@
 }
 .realmessenger-chat{
     border: 1px solid #cdcdcd;
-    display: flex;
+    list-style-type: none;
     margin-bottom: 10px;
     padding: 10px;
     color: #000;

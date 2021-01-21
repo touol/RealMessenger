@@ -44,11 +44,14 @@ $search_contact = '';
 $resp = $RealMessenger->search_contact();
 $search_contact = $resp['data']['search_contact'];
 
+$search_chat = $RealMessenger->search_chat();
+
 $output = $RealMessenger->pdoTools->getChunk($OuterTpl,[
     'hash'=>$RealMessenger->config['hash'],
     'messages'=>$messages,
     'form'=>$form,
     'chats'=> $chats,
     'search_contact'=> $search_contact,
+    'search_chat'=> $search_chat,
 ]);
 return $output;

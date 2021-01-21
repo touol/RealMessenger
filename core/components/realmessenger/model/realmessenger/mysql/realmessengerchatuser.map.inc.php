@@ -13,6 +13,7 @@ $xpdo_meta_map['RealMessengerChatUser']= array (
     'user_id' => 0,
     'chat' => 0,
     'timestamp' => NULL,
+    'closed' => 0,
   ),
   'fieldMeta' => 
   array (
@@ -39,6 +40,15 @@ $xpdo_meta_map['RealMessengerChatUser']= array (
       'dbtype' => 'datetime',
       'phptype' => 'datetime',
       'null' => false,
+    ),
+    'closed' => 
+    array (
+      'dbtype' => 'tinyint',
+      'precision' => '1',
+      'phptype' => 'boolean',
+      'attributes' => 'unsigned',
+      'null' => false,
+      'default' => 0,
     ),
   ),
   'indexes' => 
@@ -68,6 +78,22 @@ $xpdo_meta_map['RealMessengerChatUser']= array (
       'columns' => 
       array (
         'chat' => 
+        array (
+          'length' => '',
+          'collation' => 'A',
+          'null' => false,
+        ),
+      ),
+    ),
+    'closed' => 
+    array (
+      'alias' => 'closed',
+      'primary' => false,
+      'unique' => false,
+      'type' => 'BTREE',
+      'columns' => 
+      array (
+        'closed' => 
         array (
           'length' => '',
           'collation' => 'A',

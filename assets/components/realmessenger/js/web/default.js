@@ -18,6 +18,7 @@
     RealMessenger.Callbacks = RealMessengerConfig.Callbacks = {
         Chat: {
             load: RealMessengerConfig.callbacksObjectTemplate(),
+            close: RealMessengerConfig.callbacksObjectTemplate(),
             remove: RealMessengerConfig.callbacksObjectTemplate(),
             save_message: RealMessengerConfig.callbacksObjectTemplate(),
             send_read_messages: RealMessengerConfig.callbacksObjectTemplate(),
@@ -160,6 +161,7 @@
         
         callbacks: {
             load: RealMessengerConfig.callbacksObjectTemplate(),
+            close: RealMessengerConfig.callbacksObjectTemplate(),
             remove: RealMessengerConfig.callbacksObjectTemplate(),
             save_message: RealMessengerConfig.callbacksObjectTemplate(),
             send_read_messages: RealMessengerConfig.callbacksObjectTemplate(),
@@ -167,12 +169,13 @@
         
         initialize: function () {
             RealMessenger.$doc
-                .on('click', '.realmessenger-chat', function (e) {
+                .on('click', '.realmessenger-chat-body', function (e) {
                     
                     e.preventDefault();
-                    chat = $(this).data('id');
+                    $chat = $(this).closest('.realmessenger-chat');
+                    chat = $chat.data('id');
                     hash = $(this).closest('#realmesseger').data('hash');
-                    $chat = $(this);
+                    
                     RealMessenger.sendData.$chat = $chat;
                     
                     RealMessenger.sendData.data = {
@@ -205,6 +208,31 @@
                         
                     };
                     RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Chat.callbacks.load, RealMessenger.Callbacks.Chat.load);
+                
+                });
+            RealMessenger.$doc
+                .on('click', '.realmessenger-chat-close', function (e) {
+                    
+                    e.preventDefault();
+                    $chat = $(this).closest('.realmessenger-chat');
+                    chat = $chat.data('id');
+                    hash = $(this).closest('#realmesseger').data('hash');
+                    
+                    RealMessenger.sendData.$chat = $chat;
+                    
+                    RealMessenger.sendData.data = {
+                        hash: hash,
+                        action: 'close_chat',
+                        chat: chat,
+                    };
+                    var callbacks = RealMessenger.Chat.callbacks;
+            
+                    callbacks.close.response.success = function (response) {
+                        $chat = RealMessenger.sendData.$chat;
+                        $chat.remove();
+                        $('#realmessenger-messages').html('');
+                    };
+                    RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Chat.callbacks.close, RealMessenger.Callbacks.Chat.close);
                 
                 });
             RealMessenger.$doc
@@ -317,9 +345,11 @@
                         return;
                     }
                     hash = $(this).closest('#realmesseger').data('hash');
+                    search_goal = $autocomplect.data('search_goal');
                     RealMessenger.sendData.$autocomplect = $autocomplect;
                     RealMessenger.sendData.data = {
                         hash: hash,
+                        search_goal: search_goal,
                         action: 'autocomplect_search_contact',
                         query: '',
                     };
@@ -368,9 +398,11 @@
                     $autocomplect = $(this).closest('.realmessenger-autocomplect');
 
                     hash = $(this).closest('#realmesseger').data('hash');
+                    search_goal = $autocomplect.data('search_goal');
                     RealMessenger.sendData.$autocomplect = $autocomplect;
                     RealMessenger.sendData.data = {
                         action: 'autocomplect_search_contact',
+                        search_goal: search_goal,
                         hash: hash,
                         query: $(this).val(),
                     };

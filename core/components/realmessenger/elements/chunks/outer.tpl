@@ -6,6 +6,7 @@
         </div>
         <div class="col-md-3 col-md-pull-9" style="padding: 10px;">
             {$search_contact}
+            {$search_chat}
             {$chats}
         </div>
     </div>
