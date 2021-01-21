@@ -231,6 +231,8 @@
                         $chat = RealMessenger.sendData.$chat;
                         $chat.remove();
                         $('#realmessenger-messages').html('');
+                        $('#realmessenger-message-form-wrapper').hide();
+                        $('.realmessenger-chats-empty').show();
                     };
                     RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Chat.callbacks.close, RealMessenger.Callbacks.Chat.close);
                 
