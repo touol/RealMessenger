@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'b4.tpl.RealMessenger.outer' => [
+        'file' => 'b4.outer',
+        'description' => '',
+    ],
+    'b4.tpl.RealMessenger.search.contact' => [
+        'file' => 'b4.search.contact',
+        'description' => '',
+    ],
     'tpl.RealMessenger.outer' => [
         'file' => 'outer',
         'description' => '',

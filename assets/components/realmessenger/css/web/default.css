@@ -9,6 +9,9 @@
     top: auto;
     left: auto;
 }
+.realmessenger-chats{
+    padding-left: 0;
+}
 .realmessenger-chat{
     border: 1px solid #cdcdcd;
     list-style-type: none;
