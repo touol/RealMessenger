@@ -1,5 +1,5 @@
 Changelog for RealMessenger.
-1.1.0-beta
+1.1.2-beta
 ==============
 - Адаптация к bootstrap 4.
 
