@@ -5,9 +5,9 @@
         <input type="search" class="form-control realmessenger-autocomplect-content" 
         placeholder="{if $search_goal_label}{$search_goal_label}{else}Поиск контактов{/if}" 
         />
-        <div class="input-group-btn">
-            <button class="btn realmessenger-autocomplect-all">
-                <span class="caret"></span>
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary realmessenger-autocomplect-all">
+                <span class="fa fa-caret-down"></span>
             </button>
             
         </div>
