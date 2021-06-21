@@ -5,7 +5,7 @@
 		<span>{$fullname}</span>
 	</div>
 	<div class="realmessenger-message-body">
-    	<p><time datetime="{$time}">{$date_ago}</time>
+    	<p><time datetime="{$time}">{$date_ago}15:20</time>
 	        {$text}
 	    </p>
 	</div>

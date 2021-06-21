@@ -263,7 +263,7 @@ class RealMessenger
                 foreach($rows as $row){
                     $row['ownmessage'] = 1;
                     $output[] = $this->pdoTools->getChunk($MessageTpl,$row);
-                    $message = $row;
+                    $message0 = ['ownmessage'=>$row['ownmessage']];
                 }
                 //получить кол-во последних сообщений в чате и дописать в notify channel при send
                 if($notify){
@@ -286,9 +286,9 @@ class RealMessenger
                             $last_user_id = $m_user['user_id'];
                         }
                     }
-                    $message['messages'] = implode("\r\n",$output);
+                    $message0['messages'] = implode("\r\n",$output);
 
-                    $notify->json = json_encode($message);
+                    $notify->json = json_encode($message0);
                     $notify->save();
                     $notify->send($user_data);
                 }

@@ -1,13 +1,14 @@
 <div id="realmesseger" data-hash="{$hash}">
     <div class="row">
-        <div class="col-md-3" style="padding: 10px;">
+        <div class="ctrl-panel">
             {$search_contact}
             {$search_chat}
             {$chats}
         </div>
-        <div class="col-md-9" style="padding: 10px;">
+        <div class="mess-panel">
             {$messages}
             {$form}
+
         </div>
     </div>
 </div>

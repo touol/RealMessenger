@@ -422,3 +422,43 @@
         RealMessenger.initialize();
     });
 })(window, document, jQuery, RealMessengerConfig);
+$(function(){
+    let $fileUpField = $('.userfiles-form-wrapper');
+    let $btnClip  = $('.js__btn-clip'); 
+    let $fileFormHCrossBtn = $('.js__parent-hide');
+    
+    let $backToChat = $('.js__back-to-chat'); //стрелочка в шапке переписки, там где ФИО
+    let $rlChat = $('.realmessenger-chats'); //карточка чата
+    let $ctrlPanel = $('.ctrl-panel'); //панель с чатами.
+    
+    //функция закрытия панели подгрузки фалов
+    function fileFormHide(){
+        $fileUpField.removeClass('userfiles-form-wrapper__show');
+    }
+    //событие нажатия на кнопку Скрепка
+    $btnClip.on('click', function(){ 
+        $(this).parent().parent().prev().addClass('userfiles-form-wrapper__show');
+    });
+    //событие нажатия на крестик находящийся на панели подгрузки файлов
+    $fileFormHCrossBtn.on('click', function(){
+        fileFormHide()
+    });
+    
+    function hideCtrlPanel(){
+        if($(window).outerWidth() < 999){
+            $ctrlPanel.addClass('ctrl-panel__hide');
+        }
+    }
+    function showCtrlPanel(){
+        if($(window).outerWidth() < 999){
+            $ctrlPanel.removeClass('ctrl-panel__hide');
+        }
+    }
+    $rlChat.on('click', function(){
+        hideCtrlPanel();
+    });
+    $backToChat.on('click', function(){
+        showCtrlPanel();
+    });
+    
+});

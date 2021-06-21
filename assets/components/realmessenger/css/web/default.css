@@ -1,43 +1,438 @@
 #realmesseger {
-    width:99%;
-}
-.realmessenger-autocomplect-all{
-    width: 36px;
-}
-.realmessenger-autocomplect-menu{
-    position: absolute;
-    top: auto;
-    left: auto;
-}
-.realmessenger-chats{
-    padding-left: 0;
-}
-.realmessenger-chat{
-    border: 1px solid #cdcdcd;
-    list-style-type: none;
-    margin-bottom: 10px;
-    padding: 10px;
-    color: #000;
-    line-height: 23px;
-}
-.realmessenger-chat.active{
-    background:  #cdcdcd;
-}
-.realmessenger-chat img{
-    width: 100px;
-    height: 100px;
-    vertical-align: middle;
-}
-.realmessenger-chat .description{
-    width: calc(100% - 90px);
-    padding-left: 20px;
-}
-.realmessenger-message.ownmessage{
-    margin: 0 0px 10px 0;
-}
-#realmessenger-messages{
-    overflow:scroll;
-    overflow-x:hidden;
-    overflow-y: auto;
-    max-height: 600px;
-}
+    /* width:99%;*/
+ }
+ .realmessenger-autocomplect-all{
+     width: 36px;
+ }
+ .realmessenger-autocomplect-menu{
+     position: absolute;
+     top: auto;
+     left: auto;
+ }
+ .realmessenger-chats{
+     padding-left: 0;
+ }
+ .realmessenger-chat{
+     position: relative;
+     border: 1px solid #cdcdcd;
+     list-style-type: none;
+     margin-bottom: 10px;
+     padding: 10px;
+     color: #000;
+     line-height: 23px;
+     border-radius: .25rem;
+     background-color: #fff;
+     padding-right: 30px;
+ }
+ .realmessenger-chat.active{
+     background:  #cdcdcd;
+ }
+ .close-corss-btn{
+     
+ }
+ #realmesseger .realmessenger-chat-close{
+     position: absolute;
+     display: block;
+     top: 10px;
+     right: 10px;
+     cursor: pointer;
+     width: 15px;
+     height: 15px;
+     padding: 0; 
+     
+ }
+ .close-corss-btn{
+     position: relative;
+      width: 15px;
+     height: 15px;
+     padding: 0; 
+     display: block;
+     cursor: pointer;
+ }
+ .userfiles-form-wrapper .close-corss-btn{
+     position: absolute;
+     top: 15px;
+     right: 15px;
+ }
+ #realmesseger .realmessenger-chat-close::before,
+ #realmesseger .realmessenger-chat-close::after,
+ .close-corss-btn::after,
+ .close-corss-btn::before{
+     content: '';
+     position: absolute;
+     width: 100%;
+     height: 2px;
+     background-color: #007bff;
+     top: 50%; 
+ }
+ #realmesseger .realmessenger-chat-close::before{
+     transform: translateX(-50%) rotate(45deg);
+ }
+ 
+ #realmesseger .realmessenger-chat-close::after
+ { 
+     transform: translateX(-50%) rotate(-45deg);
+ } 
+ .close-corss-btn::before{
+     transform: translateY(-50%) rotate(-45deg);
+ }
+ .close-corss-btn::after{
+     transform: translateY(-50%) rotate(45deg);
+ }
+ #realmesseger .realmessenger-chat-close:hover::before,
+ #realmesseger .realmessenger-chat-close:hover::after,
+ .close-corss-btn:hover::before,
+ .close-corss-btn:hover::after{
+     background-color: #0069d9;
+ }
+ .realmessenger-chat__avatar{  
+     margin-right: .5em;
+     position: relative;
+     width: 70px;
+     height: 70px;
+     border-radius: .25rem;
+     overflow: hidden;
+     background-repeat: no-repeat;
+     background-size: cover;
+     background-position: center center;
+ }
+ .realmessenger-chat__avatar .realmessenger-chat-status{
+     position: absolute;
+     top: 5px;
+     left: 5px;
+     width: 15px;
+     height: 15px;
+     border-radius: 50%;
+ }
+ .realmessenger-chat__avatar .realmessenger-chat-status.realmessenger-online{
+     background-color: #4ed668;
+ }
+ .realmessenger-chat__avatar .realmessenger-chat-status.realmessenger-offline{
+     background-color: #ff0000;
+ }
+ 
+ .realmessenger-chat .description{ 
+     position: relative;
+     display:block;
+     display: flex;
+ }
+ .last-message{
+     font-size: 14px;
+     color: grey;
+      overflow: hidden;
+     white-space: nowrap;
+     text-overflow: ellipsis; 
+ }
+ .realmessenger__mess-count{
+     position: absolute;
+     border-radius: 50%;
+     background-color: green;
+     color: #fff; 
+     font-size: 11px;
+     line-height: 21px;
+     width: 23px;
+     height: 23px;
+     line-height: 25px;
+     bottom: 0;
+     right: -17px;
+     text-align: center;
+     font-weight: bold;
+ }
+ .realmessenger__user-fullname{
+     font-weight: bold;
+     display: flex;
+     align-items: center;
+ }
+ .realmessenger__user-position{
+     font-size: 14px;
+     line-height: 18px;
+ }
+ .realmessenger-messages-empty{
+     text-align: center;
+ }
+ .realmessenger-message{
+     margin: 0 0px 10px 0;
+ }
+ #realmessenger-messages{
+     overflow:scroll;
+     overflow-x:hidden;
+     overflow-y: auto;
+     max-height: 600px;
+ }
+ 
+ /*V*/
+ 
+ #realmesseger .row{
+     margin: 0;
+ }
+ #realmesseger .ctrl-panel{
+     max-width: 350px; 
+     width: 100%;
+ }
+ 
+ #realmesseger .ctrl-panel,
+ #realmesseger .mess-panel{
+     flex-grow: 1;
+     padding: 0.5em;
+     border-radius: .25rem;
+ }
+ #realmesseger .mess-panel{ 
+     border: 1px solid #ced4da;
+     position: relative;
+     padding-bottom: 150px;
+     box-sizing: border-box;
+     max-width: 567px;
+     overflow: hidden;
+ } 
+ #realmesseger .ctrl-panel{
+     background-color: #e9ecef;
+     margin-right: 0.5em;
+      
+ }
+ 
+ #realmesseger .realmessenger-autocomplect-menu{
+     padding: 0;
+     margin: 0;
+     width: 100%;
+     top: 97%;
+     padding-top: 0.2em;
+     padding-bottom: 0.2em;
+ }
+ #realmesseger .realmessenger-autocomplect-menu li{
+     padding: .275rem .75rem;
+ }
+ #realmesseger .btn-outline-secondary:focus {
+     box-shadow: none;
+ }
+ #realmesseger .realmessenger-autocomplect .input-group .input-group-append{
+ 
+ }
+ 
+ /*блок сообщений*/
+ #realmessenger-message-form-wrapper{
+     position: absolute; 
+     bottom: 0px;
+     left: 0;
+     padding: .5em;
+ }
+ 
+ .realmessenger-message-form-footer{
+     display: flex;
+     justify-content: flex-start;
+     align-items: center;
+ }
+ .realmessenger-message-form-footer .form-footer__icon-btn{
+     display: block;
+     width: 25px;
+     height: 25px;
+     background-color: transparent;
+     border: none;
+     background-repeat: no-repeat;
+     background-position: center center;
+     border-radius: .25em;
+     margin-left: 10px;
+ }
+ .realmessenger-message-form-footer .form-footer__icon-btn:focus,
+ .realmessenger-message-form-footer .form-footer__icon-btn:active{
+     border: none;
+     box-shadow: none;
+     outline: none;
+ }
+ .realmessenger-message-form-footer .btn-clip{
+     background-image: url(/assets/components/realmessenger/img/clip.svg);
+     background-size: contain;
+ }
+ .realmessenger-message-form-footer .btn-smile{
+     background-image: url(/assets/components/realmessenger/img/smile.svg);
+     background-size: contain;
+ }
+ .realmessenger-message-form-footer .btn-primary{
+     display: block; 
+     margin-left: auto;
+ }
+ #realmessenger-message-editor{
+     margin-bottom: 0.5em;
+     min-height: 95px;
+     transition: all 0.3s ease;
+     resize: none;
+ }
+ #realmessenger-message-editor:focus{
+     box-shadow: none;
+     border-color: #007bff;
+ }
+ .textarea::-webkit-input-placeholder{opacity: 1; transition: opacity 0.3s ease;}
+ .textarea::-moz-placeholder{opacity: 1; transition: opacity 0.3s ease;}
+ .textarea:-moz-placeholder{opacity: 1; transition: opacity 0.3s ease;}
+ .textarea:-ms-input-placeholder{opacity: 1; transition: opacity 0.3s ease;}
+ .textarea:focus::-webkit-input-placeholder{opacity: 0; transition: opacity 0.3s ease;}
+ .textarea:focus::-moz-placeholder{opacity: 0; transition: opacity 0.3s ease;}
+ .textarea:focus:-moz-placeholder{opacity: 0; transition: opacity 0.3s ease;}
+ .textarea:focus:-ms-input-placeholder{opacity: 0; transition: opacity 0.3s ease;}
+ 
+ .db{
+     display: block;
+ }
+ 
+ #realmessenger-messages-wrapper, 
+ #realmessenger-message-form-wrapper{
+     width: 100%;
+ }
+ #realmessenger-messages{
+     margin: 0;
+     padding: 0;
+ }
+ .realmessenger__chat-info{
+     position: relative; 
+     min-height: 40px;
+     box-sizing: border-box; 
+     padding: 0px 5px 10px 30px;
+     box-sizing: border-box;
+     margin-bottom: 10px;
+ }
+ .realmessenger__chat-info::after{
+     content: '';
+     position: absolute; 
+     width: 120%;
+     bottom: 0;
+     left: 50%;
+     transform: translateX(-50%);
+     border-bottom: 1px solid #ced4da;
+ }
+ .realmessenger__chat-info .back-btn{
+     position: absolute;
+     top: 39%;
+     transform: translateY(-50%);
+     left: 7px;
+     background: none;
+     outline: none;
+     width: 15px;
+     height: 20px;
+     border: none;
+     padding: 0; 
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     
+ }
+ .realmessenger__chat-info .back-btn span{
+         display: block;
+     width: 15px;
+     height: 15px;
+     border-left: 2px solid #007bff;
+     border-top: 2px solid #007bff;
+     transform: rotate(-45deg);
+     position: relative;
+     left: 5px;
+     cursor: pointer;
+     transition: all 200ms ease;
+ }
+ .realmessenger__chat-info .back-btn span:hover{
+     border-left: 2px solid #0069d9;
+     border-top: 2px solid #0069d9;
+ }
+ .realmessenger__chat-info .realmessenger__chat-info__user{
+     text-align: center;
+ }
+ .realmessenger__chat-info .realmessenger__chat-info__user-name{
+     display: block;  
+ }
+ .realmessenger__chat-info .realmessenger__chat-info__user-status{
+     display: block;
+     font-size: 12px;
+     line-height: 12px;
+     color: grey;
+ }
+ #realmessenger-messages .realmessenger-message {
+     list-style-type: none;
+ } 
+ #realmessenger-messages .realmessenger-message .name{
+     display: flex;
+     align-items: center;
+     margin-bottom: .3em;
+ }
+ #realmessenger-messages .realmessenger-message .name a{
+     margin-right: .3em;
+     border-radius: .45rem;
+     width: 38px;
+     height: 38px;
+     overflow: hidden;
+ }
+ #realmessenger-messages .realmessenger-message .name span{
+     font-weight: bold;
+ }
+  #realmessenger-messages .realmessenger-message .name a img{
+      width: 100%;
+      height: auto;
+  }
+  #realmessenger-messages .realmessenger-message .realmessenger-message-body{
+      max-width: 495px;
+      display: flex;
+  }
+  #realmessenger-messages .realmessenger-message.ownmessage{
+      text-align: right;
+  }
+ #realmessenger-messages .realmessenger-message.ownmessage .name{
+     flex-direction: row-reverse;
+ }
+ #realmessenger-messages .realmessenger-message.ownmessage .name a{
+     margin-right: 0;
+     margin-left: .3em;
+ }
+ #realmessenger-messages .realmessenger-message.ownmessage .realmessenger-message-body{
+     display: flex;
+     justify-content: flex-end;
+ } 
+ #realmessenger-messages .realmessenger-message .realmessenger-message-body time{
+     display: block;
+     font-size: 14px;
+     color: grey;
+ }
+ #realmessenger-message-form-wrapper .userfiles-form-wrapper{
+   display: none;
+   margin-bottom: .5em;
+   
+ }
+ #realmessenger-message-form-wrapper .userfiles-form-wrapper.userfiles-form-wrapper__show{
+     display: block;
+ }
+ .clearfix::after{
+     content: '';
+     display: table;
+     width: 100%;
+     clear: both;
+ }
+ #realmessenger-chats-wrapper{
+     margin-bottom: 25px;
+ }
+ #realmesseger .ctrl-panel.ctrl-panel__hide{
+     left: -800px;
+ }
+ @media screen and (max-width: 999px){
+     #realmesseger .row{
+         flex-direction: column;
+         position: relative;
+         overflow: hidden;
+     }
+     #realmesseger .ctrl-panel{
+         max-width: 100%;
+         margin-right: 0;
+         position: absolute;
+         left: 0;
+         height: 100%;
+         z-index: 10;
+         overflow: auto;
+         transition: all 500ms ease-in-out;
+     }
+     .form-group{
+         margin-bottom: .5em;
+     }
+     #realmesseger .mess-panel{
+         height: 600px;
+         max-width: 100%;
+     }
+ }
+ @media screen and (max-width: 768px){
+     #realmesseger{
+         margin-bottom: 25px;
+     }
+ }
