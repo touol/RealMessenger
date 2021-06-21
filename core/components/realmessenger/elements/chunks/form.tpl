@@ -19,7 +19,7 @@
         <div class="realmessenger-message-form-footer"> 
             <button class="btn-smile form-footer__icon-btn"></button>
             <button class="btn-clip form-footer__icon-btn js__btn-clip"></button>
-            <input type="submit" class="btn btn-primary submit" value="Отправить" title="Ctrl + Shift + Enter" />
+            <input type="submit" class="btn btn-primary submit" value="Отправить" title="Отправить Enter. Перевод строки Ctrl+Enter." />
         </div>
         
     </form>

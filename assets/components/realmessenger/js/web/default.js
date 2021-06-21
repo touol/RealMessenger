@@ -330,9 +330,16 @@
                 
                 });
             RealMessenger.$doc
-                .on('keyup', 'form#realmessenger-message-form textarea', function (e) {
+                .on('keydown', 'form#realmessenger-message-form textarea', function (e) {
                     
                     //e.preventDefault();
+                    if (e.code == 'Enter') {
+                        if (!e.ctrlKey && !e.shiftKey) {
+                            e.preventDefault();
+                            $(this).trigger("submit");
+                        }
+                        return false;
+                    }
                     $el_chat = $('.realmessenger-chat.active');
                     if($el_chat.find('.realmessenger__mess-count').text() == 0) return;
                     if($(this).text().length > 1) return;
@@ -366,6 +373,8 @@
                                 $badge.hide();
                             }else{
                                 $badge.show();
+                                var audio = new Audio(RealMessengerConfig.jsUrl+'web/new_message.mp3');
+                                audio.play();
                                 if($el_chat.hasClass("active")){
                                     $messages = $(event.detail.data.messages);
                                     $messages.removeClass('ownmessage');
@@ -375,6 +384,7 @@
                                 }
                             }
                         }
+                        
                     }
                 }
             });
