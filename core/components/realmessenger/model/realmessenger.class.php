@@ -82,9 +82,9 @@ class RealMessenger
                     }
 
                     $config_js = preg_replace(array('/^\n/', '/\t{5}/'), '', '
-							RealMessenger = {};
-							RealMessengerConfig = ' . $this->modx->toJSON($this->config) . ';
-					');
+                            RealMessenger = {};
+                            RealMessengerConfig = ' . $this->modx->toJSON($this->config) . ';
+                    ');
 
 
                     $this->modx->regClientStartupScript("<script type=\"text/javascript\">\n" . $config_js . "\n</script>", true);
@@ -92,12 +92,12 @@ class RealMessenger
 
                         if (!empty($js) && preg_match('/\.js/i', $js)) {
                             $this->modx->regClientScript(preg_replace(array('/^\n/', '/\t{7}/'), '', '
-							<script type="text/javascript">
-								if(typeof jQuery == "undefined") {
-									document.write("<script src=\"' . $this->config['jsUrl'] . 'web/lib/jquery.min.js\" type=\"text/javascript\"><\/script>");
-								}
-							</script>
-							'), true);
+                            <script type="text/javascript">
+                                if(typeof jQuery == "undefined") {
+                                    document.write("<script src=\"' . $this->config['jsUrl'] . 'web/lib/jquery.min.js\" type=\"text/javascript\"><\/script>");
+                                }
+                            </script>
+                            '), true);
                             $this->modx->regClientScript(str_replace($config['pl'], $config['vl'], $js));
 
                         }
@@ -118,7 +118,7 @@ class RealMessenger
                     $this->config['ContactGroups'] = implode(',',$ContactGroups0);
                     $_SESSION['RealMessenger'][$this->config['hash']] = $this->config;
                     /*if(isset($_SESSION['getTables'][$this->config['hash']][$gts_class][$gts_name]))
-			        return $_SESSION['getTables'][$this->config['hash']][$gts_class][$gts_name];*/
+                    return $_SESSION['getTables'][$this->config['hash']][$gts_class][$gts_name];*/
 
                 }
 
@@ -301,8 +301,8 @@ class RealMessenger
     }
 
     public function prepCommentNotifyes($chat, $notify,$hash) {
-		$owner_uid = $this->modx->user->id;
-		if(isset($_SESSION['RealMessenger'][$hash]['ContactGroupsPageIds'])){
+        $owner_uid = $this->modx->user->id;
+        if(isset($_SESSION['RealMessenger'][$hash]['ContactGroupsPageIds'])){
             $ContactGroupsPageIds = $_SESSION['RealMessenger'][$hash]['ContactGroupsPageIds'];
         }else{
             $ContactGroupsPageIds = '';
@@ -353,12 +353,12 @@ class RealMessenger
         $this->pdoTools->setConfig($default, false);
         $messenger_users = $this->pdoTools->run();
 
-		//$messenger_users = $chat->getMany('ChatUsers');
+        //$messenger_users = $chat->getMany('ChatUsers');
         
         
-		if (!$notify) {
-			return;// 'Could not load gtsNotify class!';
-		}
+        if (!$notify) {
+            return;// 'Could not load gtsNotify class!';
+        }
         foreach($messenger_users as $chatuser){
             foreach($ContactGroups as $cgk => $cg){    
                 if($chatuser['user_group'] == $cg)
@@ -573,8 +573,56 @@ class RealMessenger
                 $user_data[$user_id][$chat->id]['chat_count'] = 0;
                 $this->gtsNotify->remove_channel_notifys($notify_ids,'RealMessenger',$user_data);
             }
+            //собеседники
+            $default_users = array(
+                'class' => 'RealMessengerChat',
+                'where' => [
+                    'RealMessengerChatUser.user_id:!='=>$user_id,
+                    'RealMessengerChat.id'=> $chat->id,
+                ],
+                'leftJoin' => [
+                    'RealMessengerChatUser'=>[
+                        'class'=>'RealMessengerChatUser',
+                        'on'=>'RealMessengerChatUser.chat = RealMessengerChat.id',
+                    ],
+                    'modUser'=>[
+                        'class'=>'modUser',
+                        'on'=>'modUser.id = RealMessengerChatUser.user_id',
+                    ],
+                    'modUserProfile'=>[
+                        'class'=>'modUserProfile',
+                        'on'=>'modUserProfile.internalKey = RealMessengerChatUser.user_id',
+                    ],
+                ],
+                'select' => [
+                    //'RealMessengerChat'=>'*',
+                    'modUser'=>$this->modx->getSelectColumns('modUser','modUser','',array('id','username')),
+                    'modUserProfile'=>$this->modx->getSelectColumns('modUserProfile','modUserProfile','',array(
+                        'id','internalKey','blocked','blockeduntil','blockedafter','logincount','thislogin','failedlogincount'
+                        ,'sessionid'
+                        ),true),
+                ],
+                'sortby'=>['RealMessengerChatUser.id'=>'ASC'],
+                'limit'=>10,
+                //'groupby'=>'RealMessengerChat.id',
+                'return' => 'data',
+            );
+            $this->pdoTools->setConfig($default_users, false);
+            $users = $this->pdoTools->run();
+            $user = $users[0];
             
-            return $this->success('',array('messages'=>implode("\r\n",$output)));    
+            //get status online
+            if($this->gtsNotify){
+                $resp = $this->gtsNotify->getStatusOnline($user['id']);
+                if($resp['success']){
+                    $user['statuson'] = true;
+                    $user['status'] = $resp['data']['status'];
+                }
+            }
+
+            unset($users[0]);
+
+            return $this->success('',['messages'=>implode("\r\n",$output),'user'=>$user,'users'=>$users]);    
         }
         return $this->error("error!");
     }
@@ -634,7 +682,15 @@ class RealMessenger
                     ),
                 ));
                 $row['messages_new_count'] = $this->modx->getCount('RealMessengerMessage',$query);
-                
+                //последнее сообщение
+                $query = $this->modx->newQuery('RealMessengerMessage');
+                $query->where(array(
+                    'chat' => $row['id'],
+                ));
+                $query->sortby('createdon','DESC');
+                if($last_message = $this->modx->getObject('RealMessengerMessage',$query)){
+                    $row['last_message'] = $last_message->text;
+                }
                 //активный чат $active_chat
                 if($active_chat){
                     if($active_chat == $row['id']){
@@ -679,6 +735,16 @@ class RealMessenger
                 $this->pdoTools->setConfig($default_users, false);
                 $row['users'] = $this->pdoTools->run();
                 $row['user'] = $row['users'][0];
+                
+                //get status online
+                if($this->gtsNotify){
+                    $resp = $this->gtsNotify->getStatusOnline($row['user']['id']);
+                    if($resp['success']){
+                        $row['user']['statuson'] = true;
+                        $row['user']['status'] = $resp['data']['status'];
+                    }
+                }
+
                 unset($row['users'][0]);
 
                 $output[] = $this->pdoTools->getChunk($ChatTpl,$row);
@@ -970,14 +1036,14 @@ class RealMessenger
 
     public function makePlaceholders($config)
     {
-		$placeholders = [];
-		foreach($config as $k=>$v){
-			if(is_string($v)){
-				$placeholders['pl'][] = "[[+$k]]";
-				$placeholders['vl'][] = $v;
-			}
-		}
-		return $placeholders;
+        $placeholders = [];
+        foreach($config as $k=>$v){
+            if(is_string($v)){
+                $placeholders['pl'][] = "[[+$k]]";
+                $placeholders['vl'][] = $v;
+            }
+        }
+        return $placeholders;
     }
     
     public function pdoUsersConfig($sp = array())
@@ -1114,56 +1180,56 @@ class RealMessenger
     }
     
     /**
-	 * Sanitize any text through Jevix snippet
-	 *
-	 * @param string $text Text for sanitization
-	 * @param string $setName Name of property set for get parameters from
-	 * @param boolean $replaceTags Replace MODX tags?
-	 *
-	 * @return string
-	 */
-	public function Jevix($text = null, $setName = 'RealMessenger', $replaceTags = true) {
-		if (empty($text)) {
-			return ' ';
-		}
-		if (!$snippet = $this->modx->getObject('modSnippet', array('name' => 'Jevix'))) {
-			return 'Could not load snippet Jevix';
-		}
-		// Loading parser if needed - it is for mgr context
-		if (!is_object($this->modx->parser)) {
-			$this->modx->getParser();
-		}
+     * Sanitize any text through Jevix snippet
+     *
+     * @param string $text Text for sanitization
+     * @param string $setName Name of property set for get parameters from
+     * @param boolean $replaceTags Replace MODX tags?
+     *
+     * @return string
+     */
+    public function Jevix($text = null, $setName = 'RealMessenger', $replaceTags = true) {
+        if (empty($text)) {
+            return ' ';
+        }
+        if (!$snippet = $this->modx->getObject('modSnippet', array('name' => 'Jevix'))) {
+            return 'Could not load snippet Jevix';
+        }
+        // Loading parser if needed - it is for mgr context
+        if (!is_object($this->modx->parser)) {
+            $this->modx->getParser();
+        }
 
-		$params = array();
-		if ($setName) {
-			$params = $snippet->getPropertySet($setName);
-		}
+        $params = array();
+        if ($setName) {
+            $params = $snippet->getPropertySet($setName);
+        }
 
-		$text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
-		$params['input'] = str_replace(
-			array('[', ']', '{', '}'),
-			array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
-			$text
-		);
+        $text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
+        $params['input'] = str_replace(
+            array('[', ']', '{', '}'),
+            array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+            $text
+        );
 
-		$snippet->setCacheable(false);
-		$filtered = $snippet->process($params);
+        $snippet->setCacheable(false);
+        $filtered = $snippet->process($params);
 
-		if ($replaceTags) {
-			$filtered = str_replace(
-				array('*(*(*(*(*(*', '*)*)*)*)*)*', '`', '~(~(~(~(~(~', '~)~)~)~)~)~'),
-				array('&#91;', '&#93;', '&#96;', '&#123;', '&#125;'),
-				$filtered
-			);
-		}
-		else {
-			$filtered = str_replace(
-				array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
-				array('[', ']', '{', '}'),
-				$filtered
-			);
-		}
+        if ($replaceTags) {
+            $filtered = str_replace(
+                array('*(*(*(*(*(*', '*)*)*)*)*)*', '`', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+                array('&#91;', '&#93;', '&#96;', '&#123;', '&#125;'),
+                $filtered
+            );
+        }
+        else {
+            $filtered = str_replace(
+                array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+                array('[', ']', '{', '}'),
+                $filtered
+            );
+        }
 
-		return $filtered;
-	}
+        return $filtered;
+    }
 }

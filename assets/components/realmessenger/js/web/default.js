@@ -82,6 +82,45 @@
 
         this.timeout = 300;
     };
+    RealMessenger.Valentin = function(){
+        let $fileUpField = $('.userfiles-form-wrapper');
+        let $btnClip  = $('.js__btn-clip'); 
+        let $fileFormHCrossBtn = $('.js__parent-hide');
+        
+        let $backToChat = $('.js__back-to-chat'); //стрелочка в шапке переписки, там где ФИО
+        let $rlChat = $('.realmessenger-chats'); //карточка чата
+        let $ctrlPanel = $('.ctrl-panel'); //панель с чатами.
+        
+        //функция закрытия панели подгрузки фалов
+        function fileFormHide(){
+            $fileUpField.removeClass('userfiles-form-wrapper__show');
+        }
+        //событие нажатия на кнопку Скрепка
+        $btnClip.on('click', function(){ 
+            $(this).parent().parent().prev().addClass('userfiles-form-wrapper__show');
+        });
+        //событие нажатия на крестик находящийся на панели подгрузки файлов
+        $fileFormHCrossBtn.on('click', function(){
+            fileFormHide()
+        });
+        
+        function hideCtrlPanel(){
+            if($(window).outerWidth() < 999){
+                $ctrlPanel.addClass('ctrl-panel__hide');
+            }
+        }
+        function showCtrlPanel(){
+            if($(window).outerWidth() < 999){
+                $ctrlPanel.removeClass('ctrl-panel__hide');
+            }
+        }
+        $rlChat.on('click', function(){
+            hideCtrlPanel();
+        });
+        $backToChat.on('click', function(){
+            showCtrlPanel();
+        });
+    },
     RealMessenger.initialize = function () {
         RealMessenger.setup();
         var d = $('#realmessenger-messages');
@@ -89,6 +128,7 @@
             
         RealMessenger.Chat.initialize();
         RealMessenger.Autocomplect.initialize();
+        RealMessenger.Valentin();
     };
     RealMessenger.send = function (data, callbacks, userCallbacks) {
         var runCallback = function (callback, bind) {
@@ -191,13 +231,25 @@
                         $('#realmessenger-message-form-wrapper').show();
                         $(".realmessenger-chat").removeClass('active');
                         $chat.addClass('active');
-                        $chat.find('.messages-new-count').hide();
+                        $chat.find('.realmessenger__mess-count').hide();
                         $clone = $chat.clone();
                         
                         $('.realmessenger-chat[data-id=' + $chat.data('id') + ']').remove();
                         $(".realmessenger-chats").prepend($clone);
                         
                         $('#realmessenger-messages').html(response.data.messages);
+                        $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-name').html(response.data.user.fullname);
+                        $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status').data("user_id",response.data.user.id);
+                        
+                        if(response.data.user.statuson){
+                            if(response.data.user.status){
+                                $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status').html("online");
+                            }else{
+                                $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status').html("offline");
+                            }
+                        }else{
+                            $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status').html("");
+                        }
                         var d = $('#realmessenger-messages');
                         d.scrollTop(d.prop("scrollHeight"));
                         if($('.realmessenger-message').length > 0){
@@ -232,7 +284,9 @@
                         $chat.remove();
                         $('#realmessenger-messages').html('');
                         $('#realmessenger-message-form-wrapper').hide();
-                        
+                        $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-name').html("");
+                        $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status').html("");
+                        $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status').data("user_id","");
                     };
                     RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Chat.callbacks.close, RealMessenger.Callbacks.Chat.close);
                 
@@ -280,7 +334,8 @@
                     
                     //e.preventDefault();
                     $el_chat = $('.realmessenger-chat.active');
-                    if($el_chat.find('.messages-new-count').text() == 0) return;
+                    if($el_chat.find('.realmessenger__mess-count').text() == 0) return;
+                    if($(this).text().length > 1) return;
 
                     hash = $(this).closest('#realmesseger').data('hash');
                     RealMessenger.sendData.$el_chat = $el_chat;
@@ -305,7 +360,7 @@
                         user_data = event.detail.channels[key].data.user_data;
                         for(var chat in user_data) {
                             $el_chat = $('.realmessenger-chat[data-id="' + chat + '"]');
-                            $badge = $el_chat.find('.messages-new-count');
+                            $badge = $el_chat.find('.realmessenger__mess-count');
                             $badge.text(user_data[chat].chat_count);
                             if(user_data[chat].chat_count == 0){
                                 $badge.hide();
@@ -321,6 +376,31 @@
                             }
                         }
                     }
+                }
+            });
+            this.checkOnline();
+        },
+        checkOnline: function() {
+            $info__user_status = $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status');
+            $(document).find('.realmessenger-chat-status').each(function(){
+                var id = parseInt($(this).data('user_id'));
+                if (id) {
+                    gtsNotifyProvider.Online(id, function(event) {
+                        $el = $(document).find('.realmessenger-chat-status[data-user_id="'+id+'"');
+                        $el.removeClass('realmessenger-offline').addClass('realmessenger-online');
+                        if(id == $info__user_status.data('user_id')){
+                            $info__user_status.html("online");
+                        }
+                        
+                    });
+                    gtsNotifyProvider.Offline(id, function(event) {
+                        $el = $(document).find('.realmessenger-chat-status[data-user_id="'+id+'"');
+                        $el.removeClass('realmessenger-online').addClass('realmessenger-offline');
+                        if(id == $info__user_status.data('user_id')){
+                            $info__user_status.html("offline");
+                        }
+                        
+                    });
                 }
             });
         },
@@ -422,43 +502,3 @@
         RealMessenger.initialize();
     });
 })(window, document, jQuery, RealMessengerConfig);
-$(function(){
-    let $fileUpField = $('.userfiles-form-wrapper');
-    let $btnClip  = $('.js__btn-clip'); 
-    let $fileFormHCrossBtn = $('.js__parent-hide');
-    
-    let $backToChat = $('.js__back-to-chat'); //стрелочка в шапке переписки, там где ФИО
-    let $rlChat = $('.realmessenger-chats'); //карточка чата
-    let $ctrlPanel = $('.ctrl-panel'); //панель с чатами.
-    
-    //функция закрытия панели подгрузки фалов
-    function fileFormHide(){
-        $fileUpField.removeClass('userfiles-form-wrapper__show');
-    }
-    //событие нажатия на кнопку Скрепка
-    $btnClip.on('click', function(){ 
-        $(this).parent().parent().prev().addClass('userfiles-form-wrapper__show');
-    });
-    //событие нажатия на крестик находящийся на панели подгрузки файлов
-    $fileFormHCrossBtn.on('click', function(){
-        fileFormHide()
-    });
-    
-    function hideCtrlPanel(){
-        if($(window).outerWidth() < 999){
-            $ctrlPanel.addClass('ctrl-panel__hide');
-        }
-    }
-    function showCtrlPanel(){
-        if($(window).outerWidth() < 999){
-            $ctrlPanel.removeClass('ctrl-panel__hide');
-        }
-    }
-    $rlChat.on('click', function(){
-        hideCtrlPanel();
-    });
-    $backToChat.on('click', function(){
-        showCtrlPanel();
-    });
-    
-});

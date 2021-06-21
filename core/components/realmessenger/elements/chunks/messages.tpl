@@ -3,9 +3,13 @@
         <button class="back-btn js__back-to-chat"><span></span></button>
         <div class="realmessenger__chat-info__user">
             <span class="realmessenger__chat-info__user-name">
-                Александр Туниеков
+                {$user.fullname}
             </span>
-            <span class="realmessenger__chat-info__user-status">online</span>
+            <span class="realmessenger__chat-info__user-status" data-user_id="{$user.id}">
+            {if $user.statuson}
+                {if $user.status}online{else}offline{/if}
+            {/if}
+            </span>
         </div> 
     </div>
     <ul class="chat_list" id="realmessenger-messages">

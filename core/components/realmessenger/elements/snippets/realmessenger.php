@@ -32,7 +32,11 @@ if($with_user_id){
 
 $messages = '';
 $resp = $RealMessenger->get_chat_messages(['chat'=> $active_chat]);
-$messages = $RealMessenger->pdoTools->getChunk($MessagesTpl, ['messages'=>$resp['data']['messages']]);
+$messages = $RealMessenger->pdoTools->getChunk($MessagesTpl, [
+    'messages'=>$resp['data']['messages'],
+    'user'=>$resp['data']['user'],
+    'users'=>$resp['data']['users']
+]);
 
 $form = $RealMessenger->pdoTools->getChunk($FormTpl, ['chat'=> $active_chat]);
 
