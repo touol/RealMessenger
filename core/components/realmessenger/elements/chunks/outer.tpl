@@ -1,4 +1,4 @@
-<div id="realmesseger" data-hash="{$hash}">
+<div id="realmessenger" data-hash="{$hash}">
     <div class="row">
         <div class="col-md-9 col-md-push-3" style="padding: 10px;">
             {$messages}

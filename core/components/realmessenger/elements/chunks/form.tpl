@@ -15,7 +15,6 @@
         <input type="hidden" name="file_ids" value="0" />
         
         <textarea name="text" id="realmessenger-message-editor"  class="form-control textarea" placeholder="Введите текст"></textarea>
-        
         <div class="realmessenger-message-form-footer"> 
             <button class="btn-smile form-footer__icon-btn"></button>
             <button class="btn-clip form-footer__icon-btn js__btn-clip"></button>

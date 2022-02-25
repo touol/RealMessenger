@@ -1,4 +1,4 @@
-<div id="realmesseger" data-hash="{$hash}">
+<div id="realmessenger" data-hash="{$hash}">
     <div class="row">
         <div class="ctrl-panel">
             {$search_contact}

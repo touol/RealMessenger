@@ -1,4 +1,4 @@
-#realmesseger {
+#realmessenger {
     /* width:99%;*/
  }
  .realmessenger-autocomplect-all{
@@ -30,7 +30,7 @@
  .close-corss-btn{
      
  }
- #realmesseger .realmessenger-chat-close{
+ #realmessenger .realmessenger-chat-close{
      position: absolute;
      display: block;
      top: 10px;
@@ -54,8 +54,8 @@
      top: 15px;
      right: 15px;
  }
- #realmesseger .realmessenger-chat-close::before,
- #realmesseger .realmessenger-chat-close::after,
+ #realmessenger .realmessenger-chat-close::before,
+ #realmessenger .realmessenger-chat-close::after,
  .close-corss-btn::after,
  .close-corss-btn::before{
      content: '';
@@ -65,11 +65,11 @@
      background-color: #007bff;
      top: 50%; 
  }
- #realmesseger .realmessenger-chat-close::before{
+ #realmessenger .realmessenger-chat-close::before{
      transform: translateX(-50%) rotate(45deg);
  }
  
- #realmesseger .realmessenger-chat-close::after
+ #realmessenger .realmessenger-chat-close::after
  { 
      transform: translateX(-50%) rotate(-45deg);
  } 
@@ -79,8 +79,8 @@
  .close-corss-btn::after{
      transform: translateY(-50%) rotate(45deg);
  }
- #realmesseger .realmessenger-chat-close:hover::before,
- #realmesseger .realmessenger-chat-close:hover::after,
+ #realmessenger .realmessenger-chat-close:hover::before,
+ #realmessenger .realmessenger-chat-close:hover::after,
  .close-corss-btn:hover::before,
  .close-corss-btn:hover::after{
      background-color: #0069d9;
@@ -162,21 +162,21 @@
  
  /*V*/
  
- #realmesseger .row{
+ #realmessenger .row{
      margin: 0;
  }
- #realmesseger .ctrl-panel{
+ #realmessenger .ctrl-panel{
      max-width: 350px; 
      width: 100%;
  }
  
- #realmesseger .ctrl-panel,
- #realmesseger .mess-panel{
+ #realmessenger .ctrl-panel,
+ #realmessenger .mess-panel{
      flex-grow: 1;
      padding: 0.5em;
      border-radius: .25rem;
  }
- #realmesseger .mess-panel{ 
+ #realmessenger .mess-panel{ 
      border: 1px solid #ced4da;
      position: relative;
      padding-bottom: 150px;
@@ -184,13 +184,13 @@
      max-width: 567px;
      overflow: hidden;
  } 
- #realmesseger .ctrl-panel{
+ #realmessenger .ctrl-panel{
      background-color: #e9ecef;
      margin-right: 0.5em;
       
  }
  
- #realmesseger .realmessenger-autocomplect-menu{
+ #realmessenger .realmessenger-autocomplect-menu{
      padding: 0;
      margin: 0;
      width: 100%;
@@ -198,13 +198,13 @@
      padding-top: 0.2em;
      padding-bottom: 0.2em;
  }
- #realmesseger .realmessenger-autocomplect-menu li{
+ #realmessenger .realmessenger-autocomplect-menu li{
      padding: .275rem .75rem;
  }
- #realmesseger .btn-outline-secondary:focus {
+ #realmessenger .btn-outline-secondary:focus {
      box-shadow: none;
  }
- #realmesseger .realmessenger-autocomplect .input-group .input-group-append{
+ #realmessenger .realmessenger-autocomplect .input-group .input-group-append{
  
  }
  
@@ -404,16 +404,16 @@
  #realmessenger-chats-wrapper{
      margin-bottom: 25px;
  }
- #realmesseger .ctrl-panel.ctrl-panel__hide{
+ #realmessenger .ctrl-panel.ctrl-panel__hide{
      left: -800px;
  }
  @media screen and (max-width: 999px){
-     #realmesseger .row{
+     #realmessenger .row{
          flex-direction: column;
          position: relative;
          overflow: hidden;
      }
-     #realmesseger .ctrl-panel{
+     #realmessenger .ctrl-panel{
          max-width: 100%;
          margin-right: 0;
          position: absolute;
@@ -426,13 +426,13 @@
      .form-group{
          margin-bottom: .5em;
      }
-     #realmesseger .mess-panel{
+     #realmessenger .mess-panel{
          height: 600px;
          max-width: 100%;
      }
  }
  @media screen and (max-width: 768px){
-     #realmesseger{
+     #realmessenger{
          margin-bottom: 25px;
      }
  }

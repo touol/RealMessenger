@@ -29,6 +29,10 @@ return [
         'file' => 'message',
         'description' => '',
     ],
+    'tpl.RealMessenger.last_message' => [
+        'file' => 'last_message',
+        'description' => '',
+    ],
     'tpl.RealMessenger.form' => [
         'file' => 'form',
         'description' => '',

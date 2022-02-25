@@ -91,13 +91,14 @@
         let $rlChat = $('.realmessenger-chats'); //карточка чата
         let $ctrlPanel = $('.ctrl-panel'); //панель с чатами.
         
-        //функция закрытия панели подгрузки фалов
-        function fileFormHide(){
-            $fileUpField.removeClass('userfiles-form-wrapper__show');
-        }
         //событие нажатия на кнопку Скрепка
         $btnClip.on('click', function(){ 
-            $(this).parent().parent().prev().addClass('userfiles-form-wrapper__show');
+            if($fileUpField.hasClass('userfiles-form-wrapper__show')){
+                $('form#realmessenger-message-form').trigger('submit');
+                $fileUpField.removeClass('userfiles-form-wrapper__show');
+            }else{
+                $fileUpField.addClass('userfiles-form-wrapper__show');
+            }
         });
         //событие нажатия на крестик находящийся на панели подгрузки файлов
         $fileFormHCrossBtn.on('click', function(){
@@ -214,7 +215,7 @@
                     e.preventDefault();
                     $chat = $(this).closest('.realmessenger-chat');
                     chat = $chat.data('id');
-                    hash = $(this).closest('#realmesseger').data('hash');
+                    hash = $(this).closest('#realmessenger').data('hash');
                     
                     RealMessenger.sendData.$chat = $chat;
                     
@@ -268,7 +269,7 @@
                     e.preventDefault();
                     $chat = $(this).closest('.realmessenger-chat');
                     chat = $chat.data('id');
-                    hash = $(this).closest('#realmesseger').data('hash');
+                    hash = $(this).closest('#realmessenger').data('hash');
                     
                     RealMessenger.sendData.$chat = $chat;
                     
@@ -295,7 +296,7 @@
                 .on('submit', 'form#realmessenger-message-form', function (e) {
                     
                     e.preventDefault();
-                    hash = $(this).closest('#realmesseger').data('hash');
+                    hash = $(this).closest('#realmessenger').data('hash');
                     
                     $form = $(this);
                     file_ids = [];
@@ -344,7 +345,7 @@
                     if($el_chat.find('.realmessenger__mess-count').text() == 0) return;
                     if($(this).text().length > 1) return;
 
-                    hash = $(this).closest('#realmesseger').data('hash');
+                    hash = $(this).closest('#realmessenger').data('hash');
                     RealMessenger.sendData.$el_chat = $el_chat;
 
                     RealMessenger.sendData.data = {
@@ -361,26 +362,62 @@
                 
                 });
             document.addEventListener("gtsnotifyprovider", function(event) { 
-                //console.log('notify',event.detail);
+                console.log('notify',event.detail);
                 for(var key in event.detail.channels) {
                     if(key == 'RealMessenger'){
+                        
                         user_data = event.detail.channels[key].data.user_data;
                         for(var chat in user_data) {
                             $el_chat = $('.realmessenger-chat[data-id="' + chat + '"]');
-                            $badge = $el_chat.find('.realmessenger__mess-count');
-                            $badge.text(user_data[chat].chat_count);
-                            if(user_data[chat].chat_count == 0){
-                                $badge.hide();
+                            if($el_chat.length == 0 && $('#realmessenger').length > 0){
+                                
+                                hash = $('#realmessenger').data('hash');
+                                RealMessenger.sendData.data = {
+                                    hash: hash,
+                                    action: 'add_chat',
+                                    chat: chat,
+                                };
+                                var callbacks = RealMessenger.Autocomplect.callbacks;
+                        
+                                callbacks.find_or_new_chat.response.success = function (response) {
+                                    //$(".realmessenger-chat").removeClass('active');
+                                    //$('.realmessenger-chat[data-id=' + response.data.active_chat + ']').remove();
+                                    $(".realmessenger-chats").append(response.data.chat);
+                                    var audio = new Audio(RealMessengerConfig.jsUrl+'web/new_message.mp3');
+                                    try {
+                                        audio.play();
+                                    } catch(e) {
+
+                                    }
+                                    //$('#realmessenger-messages-wrapper').replaceWith(response.data.messages);
+                                    //$('#realmessenger-message-form input[name=chat]').val(response.data.active_chat);
+                                    //$('#realmessenger-message-form-wrapper').show();
+                                    //$('.realmessenger-chats-empty').hide();
+                                };
+                                RealMessenger.send(RealMessenger.sendData.data, RealMessenger.Autocomplect.callbacks.find_or_new_chat, RealMessenger.Callbacks.Autocomplect.find_or_new_chat);
                             }else{
-                                $badge.show();
-                                var audio = new Audio(RealMessengerConfig.jsUrl+'web/new_message.mp3');
-                                audio.play();
-                                if($el_chat.hasClass("active")){
-                                    $messages = $(event.detail.data.messages);
-                                    $messages.removeClass('ownmessage');
-                                    $('#realmessenger-messages').append($messages);
-                                    var d = $('#realmessenger-messages');
-                                    d.scrollTop(d.prop("scrollHeight"));
+                                $badge = $el_chat.find('.realmessenger__mess-count');
+                                $badge.text(user_data[chat].chat_count);
+                                if(user_data[chat].chat_count == 0){
+                                    $badge.hide();
+                                }else{
+                                    $badge.show();
+                                    var audio = new Audio(RealMessengerConfig.jsUrl+'web/new_message.mp3');
+                                    try {
+                                        audio.play();
+                                    } catch(e) {
+
+                                    }
+                                    $last_message = $el_chat.find('.last-message');
+                                    $last_message.html(event.detail.data.last_message);
+
+                                    if($el_chat.hasClass("active")){
+                                        $messages = $(event.detail.data.messages);
+                                        $messages.removeClass('ownmessage');
+                                        $('#realmessenger-messages').append($messages);
+                                        var d = $('#realmessenger-messages');
+                                        d.scrollTop(d.prop("scrollHeight"));
+                                    }
                                 }
                             }
                         }
@@ -389,6 +426,7 @@
                 }
             });
             this.checkOnline();
+            this.initEmoji();
         },
         checkOnline: function() {
             $info__user_status = $('#realmessenger-messages-wrapper .realmessenger__chat-info__user-status');
@@ -414,6 +452,17 @@
                 }
             });
         },
+        initEmoji: function() {
+            new FgEmojiPicker({
+                trigger: '.btn-smile',
+                dir: RealMessengerConfig.jsUrl+'web/vendor/emoji-picker/',
+                removeOnSelection: false,
+                closeButton: true,
+                position: ['top', 'left'],
+                preFetch: true,
+                insertInto: document.querySelector('#realmessenger-message-editor'),
+            });
+        },
     };
     RealMessenger.Autocomplect = {
         callbacks: {
@@ -436,7 +485,7 @@
                         $menu.hide();
                         return;
                     }
-                    hash = $(this).closest('#realmesseger').data('hash');
+                    hash = $(this).closest('#realmessenger').data('hash');
                     search_goal = $autocomplect.data('search_goal');
                     RealMessenger.sendData.$autocomplect = $autocomplect;
                     RealMessenger.sendData.data = {
@@ -458,7 +507,7 @@
                     e.preventDefault();
                     //add chat
                     new_chat_user_id = $(this).data('id');
-                    hash = $(this).closest('#realmesseger').data('hash');
+                    hash = $(this).closest('#realmessenger').data('hash');
 
                     $autocomplect = $(this).closest('.realmessenger-autocomplect');
                     RealMessenger.sendData.$autocomplect = $autocomplect;
@@ -489,7 +538,7 @@
                     e.preventDefault();
                     $autocomplect = $(this).closest('.realmessenger-autocomplect');
 
-                    hash = $(this).closest('#realmesseger').data('hash');
+                    hash = $(this).closest('#realmessenger').data('hash');
                     search_goal = $autocomplect.data('search_goal');
                     RealMessenger.sendData.$autocomplect = $autocomplect;
                     RealMessenger.sendData.data = {

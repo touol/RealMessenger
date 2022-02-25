@@ -18,6 +18,7 @@ $RealMessenger->initialize($modx->context->key,$scriptProperties);
 $OuterTpl = $modx->getOption('OuterTpl', $scriptProperties, 'tpl.RealMessenger.outer');
 $ChatsTpl = $modx->getOption('ChatsTpl', $scriptProperties, 'tpl.RealMessenger.chats');
 $MessagesTpl = $modx->getOption('MessagesTpl', $scriptProperties, 'tpl.RealMessenger.messages');
+//$LastMessagesTpl = $modx->getOption('LastMessagesTpl', $scriptProperties, 'tpl.RealMessenger.last_messages');
 $FormTpl = $modx->getOption('FormTpl', $scriptProperties, 'tpl.RealMessenger.form');
 
 

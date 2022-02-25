@@ -11,9 +11,9 @@
             <div class="realmessenger__mess-count" {if !$messages_new_count}style="display:none;"{/if}>{$messages_new_count}</div>
         </div>
         {*<span class="db realmessenger__user-position"><b>Специальность:</b> <span>Врач функциональной диагностики</span></span>*}
-        <div class="last-message"><span>
+        <div class="last-message">
             {$last_message}
-        </span></div>
+        </div>
     </div>
     
 </li>

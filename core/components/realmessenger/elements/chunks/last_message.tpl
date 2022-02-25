@@ -1,0 +1,1 @@
+<span>{$createdon | date : "d.m.Y H:s"} {$text | truncate  : 30 : ' ...'}</span>

@@ -1,16 +1,16 @@
 <li class="{if $ownmessage}ownmessage{/if} realmessenger-message {$messag_new}" 
     id="message-{$id}" data-id="{$id}">
-	<div class="name">
-		<a href="#"><img src="{if !$user.photo}/assets/components/realmessenger/img/no_foto.png{else}{$avatar}{/if}" alt="" height="38" width="37"></a>
-		<span>{$fullname}</span>
-	</div>
-	<div class="realmessenger-message-body">
-    	<p><time datetime="{$time}">{$date_ago}15:20</time>
-	        {$text}
-	    </p>
-	</div>
-	
-	 <div class="files">
+    <div class="name">
+        <a href="#"><img src="{if !$user.photo}/assets/components/realmessenger/img/no_foto.png{else}{$avatar}{/if}" alt="" height="38" width="37"></a>
+        <span>{$fullname}</span>
+    </div>
+    <div class="realmessenger-message-body">
+        <p><time datetime="{$createdon}">{$createdon | date : "d.m.Y H:s"}</time>
+            {$text}
+        </p>
+    </div>
+    
+     <div class="files">
         {if $file_ids}
             {$_modx->runSnippet('!pdoResources', [
                 'class' => 'UserFile',
