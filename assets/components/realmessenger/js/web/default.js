@@ -362,7 +362,7 @@
                 
                 });
             document.addEventListener("gtsnotifyprovider", function(event) { 
-                console.log('notify',event.detail);
+                //console.log('notify',event.detail);
                 for(var key in event.detail.channels) {
                     if(key == 'RealMessenger'){
                         

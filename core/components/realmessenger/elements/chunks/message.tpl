@@ -11,7 +11,7 @@
     </div>
     
      <div class="files">
-        {if $file_ids}
+        {if $file_ids >0}
             {$_modx->runSnippet('!pdoResources', [
                 'class' => 'UserFile',
                 'loadModels' => 'UserFiles',
