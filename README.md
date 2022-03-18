@@ -1,44 +1,33 @@
-RealMessenger - realtime мессенджер для modx.
-Требуется bootstrap 3. На bootstrap 4 не тестировал, но поедет только верстка. Я не спец по верстке и на другие css фреймворки требуется оформить их самостаятельно.
+Новая версия RealMessenger -компонент для обмена личными сообщениями.
+Теперь gtsNotify, требующийся для него, работает через <a href="comet-server.ru">comet-server.ru</a>. Также добавлены смайлики и онлайн-офлайн статус, и доработана верстка.
+<img src="https://file.modx.pro/files/2/2/4/22485e051bd60e4e50c477ba36fbc1bf.png" />
+До скайпа далеко, но реализован минимальный набор мессенджера.
+<cut/>
+<b>Установка</b>
+Установить с modstore gtsNotify, настроить его на <a href="comet-server.ru">comet-server.ru</a>.
+Установить и настроить UserFiles.
+Устанавливаем RealMessenger и на нужной странице вызываем сниппет: 
+<code>{'!RealMessenger' | snippet}</code> 
+Для bootstrap v4 указываем чанки:
+<code> {'!RealMessenger' | snippet :[ 
+'OuterTpl'=>'b4.tpl.RealMessenger.outer', 
+'SearchContactTpl'=>'b4.tpl.RealMessenger.search.contact', 
+]}</code>
+Поправить стили если возникнут проблемы. Для смайликов требуется база utf8mb4.
+<b>Оплата</b>
+RealMessenger можно скачать бесплатно с https://gettables.ru/. Оплата, на модсторе, чисто за техподдержку и удобство. gtsNotify стоит 90р. UserFiles - 990р.
+<b>Техподдержка</b>
+Первые 3 месяца, с этого дня 17.03.2022, техподдержка бесплатна, чтоб знать какие проблеммы возникают.
+<b>Пакеты</b>
+<a href="gettables.ru/assets/packages/realmessenger-2.0.0-beta.transport.zip">gettables.ru/assets/packages/realmessenger-2.0.0-beta.transport.zip</a>
+<a href="https://modstore.pro/office/packages/gtsnotify">gtsnotify</a>
+<a href="https://modstore.pro/packages/photos-and-files/userfiles">userfiles</a>
+<b>GitHub</b>
+<a href="https://github.com/touol/gtsNotify">https://github.com/touol/gtsNotify</a>
+<a href="https://github.com/touol/RealMessenger">https://github.com/touol/RealMessenger</a>
 
-# Установка 
-Установить getTables.
-Установить gtsNotify. Настроить для него провайдера и активировать(Поставить чекбокс активно). 
-На данный момент доступен только wss://wss.gtsnotify.ru:8081. Тарифы уточняйте на gtsnotify.ru.
-В хедере вывести сниппет gtsNotify. 
-Установить UserFiles.
-Установить RealMessenger.
-
-# Настройка
-На нужную страницу вывести сниппет RealMessenger.
-Доступные параметры сниппета:
-ContactGroups - список групп пользователей с которыми может переписываться пользователь через запятую. По умолчанию стоит 2 - id второй группы пользователей
-ContactGroupsPageIds - список id страниц, через запятую, на которых установлен сниппет RealMessenger для этой группы. По умолчанию текущая страница. Порядок id страниц соответствует порядку списка групп пользователей.
-Эти параметры нужны, чтобы организовать переписку между разными группами пользователей. Например между врачами и пациентами.
-
-Параметры чанков:
-OuterTpl - по умолчанию tpl.RealMessenger.outer - общий чанк.
-ChatsTpl - по умолчанию tpl.RealMessenger.chats - общий чанк чатов(списка контактов слева).
-ChatTpl - по умолчанию tpl.RealMessenger.chat - чанк чата.
-MessagesTpl - по умолчанию tpl.RealMessenger.messages - общий чанк сообщений.
-MessageTpl - по умолчанию tpl.RealMessenger.message - чанк сообщения.
-SearchContactTpl - по умолчанию tpl.RealMessenger.search.contact - чанк панели поика контактов.
-
-Параметры канала gtsNotify:
-Имя - RealMessenger
-Иконка - 
-Иконка пустого канала - 
-Чанк - tpl.RealMessenger.notify - чанк уведомления в меню gtsNotify.
-Отправлять по email - активно
-Чанк email - tpl.RealMessenger.email - чанк email уведомления.
-Задержка email для того, чтобы юзерам онлайн не приходили письма - 300 - в секундах
-
-Для отправки уведомлений по емаил нужно пставить в крон на каждую минуту файл core/components/gtsnotify/cron/email_send.php
-
-# Нужные доработки
-1. готово gtsNotify задвоение числи сообщений. Удаление сообщений.
-2. готово UserFiles поправить чанк формы и добавить чанк файлов плюс картинки.
-
-4. готово Фото без аватара.
-5. готово Много пользователей
-6. готово url мессенджера
+<strong>Демо</strong>
+Демонстрация работы на <a href="https://gettables.ru/">https://gettables.ru/</a>. Требуется авторизация.
+<img src="https://file.modx.pro/files/7/8/9/789f52abd7dd5692bd973464ff7c6947.png" />
+П.С. Демо не работает. Что-то снова сломалось. Счас разберусь :-)
+П.С. Теперь работает. Я оказывается тупо провайдера не настроил.
