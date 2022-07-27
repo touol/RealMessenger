@@ -729,6 +729,7 @@ class RealMessenger
             if($this->gtsNotify){
                 $user_data = []; //$user_data[$m_user['user_id']][$chat->id]['chat_count']
                 $user_data[$user_id][$chat->id]['chat_count'] = 0;
+                $user_data[$user_id][$chat->id]['find_or_new_chat'] = 1;
                 $this->gtsNotify->remove_channel_notifys($notify_ids,'RealMessenger',$user_data);
             }
             //собеседники

@@ -87,7 +87,7 @@
         let $btnClip  = $('.js__btn-clip'); 
         let $fileFormHCrossBtn = $('.js__parent-hide');
         
-        let $backToChat = $('.js__back-to-chat'); //стрелочка в шапке переписки, там где ФИО
+        //let $backToChat = $('.js__back-to-chat'); //стрелочка в шапке переписки, там где ФИО
         let $rlChat = $('.realmessenger-chats'); //карточка чата
         let $ctrlPanel = $('.ctrl-panel'); //панель с чатами.
         
@@ -118,9 +118,13 @@
         $rlChat.on('click', function(){
             hideCtrlPanel();
         });
-        $backToChat.on('click', function(){
-            showCtrlPanel();
-        });
+        // $backToChat.on('click', function(){
+        //     showCtrlPanel();
+        // });
+        RealMessenger.$doc
+            .on('click', '.realmessenger-chat-body', function (e) {
+                showCtrlPanel();
+            });
     },
     RealMessenger.initialize = function () {
         RealMessenger.setup();
@@ -369,7 +373,7 @@
                         user_data = event.detail.channels[key].data.user_data;
                         for(var chat in user_data) {
                             $el_chat = $('.realmessenger-chat[data-id="' + chat + '"]');
-                            if($el_chat.length == 0 && $('#realmessenger').length > 0){
+                            if($el_chat.length == 0 && $('#realmessenger').length > 0 && user_data[chat].find_or_new_chat != 1){
                                 
                                 hash = $('#realmessenger').data('hash');
                                 RealMessenger.sendData.data = {

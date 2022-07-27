@@ -1,4 +1,8 @@
 Changelog for RealMessenger.
+2.0.3-beta
+==============
+- Правка недочетов.
+
 2.0.0-beta
 ==============
 - Проект адаптирован для gtsNotify 2.0.0-beta, который адаптирован для https://comet-server.com/.
