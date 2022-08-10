@@ -164,7 +164,7 @@ class RealMessenger
                 }
                 break;
             default:
-                return $this->error("Метод $action в классе $class не найден!");
+                return $this->error("Метод $action в классе RealMessenger не найден!");
         }
     }
 
@@ -434,11 +434,13 @@ class RealMessenger
         $rows = $this->pdoTools->run();
         if(count($rows) == 0){ // чата не найдено. создаем новый
             //добавить проверку на группу надо еще
-            if(!$cg = $this->modx->getObject('modUserGroupMember',[
-                'member'=>$new_chat_user_id,
-                'user_group:IN'=>explode(',',$ContactGroups),
-                ])){
-                    return $this->error("user is not ContactGroups member!");
+            if($ContactGroups and $ContactGroups != '2'){
+                if(!$cg = $this->modx->getObject('modUserGroupMember',[
+                    'member'=>$new_chat_user_id,
+                    'user_group:IN'=>explode(',',$ContactGroups),
+                    ])){
+                        return $this->error("user is not ContactGroups member!");
+                }
             }
             if($chat = $this->modx->newObject('RealMessengerChat',['createdon'=>date('Y-m-d H:i:s'),'createdby'=>$user_id])){
                 if($chat->save()){
@@ -537,6 +539,7 @@ class RealMessenger
         $user_id = $this->modx->user->id;
         $hash = $data['hash'];
         $chat = (int)$data['chat'];
+        $new_chat_user_id = $data['new_chat_user_id'];
         if(empty($hash)) $hash = $this->config['hash'];
         
         if(isset($_SESSION['RealMessenger'][$hash]['ContactGroups'])){
@@ -571,11 +574,13 @@ class RealMessenger
         $rows = $this->pdoTools->run();
         if(count($rows) == 0){ // чата не найдено. создаем новый
             //добавить проверку на группу надо еще
-            if(!$cg = $this->modx->getObject('modUserGroupMember',[
-                'member'=>$new_chat_user_id,
-                'user_group:IN'=>explode(',',$ContactGroups),
-                ])){
-                    return $this->error("user is not ContactGroups member!");
+            if($ContactGroups and $ContactGroups != '2'){
+                if(!$cg = $this->modx->getObject('modUserGroupMember',[
+                    'member'=>$new_chat_user_id,
+                    'user_group:IN'=>explode(',',$ContactGroups),
+                    ])){
+                        return $this->error("user is not ContactGroups member!");
+                }
             }
             if($chat = $this->modx->newObject('RealMessengerChat',['createdon'=>date('Y-m-d H:i:s'),'createdby'=>$user_id])){
                 if($chat->save()){
